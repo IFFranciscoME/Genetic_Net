@@ -6,3 +6,7 @@
 # -- licencia: GPL-3.0 License                                                                           -- #
 # -- repositorio: https://github.com/IFFranciscoME/ada_proyecto                                          -- #
 # -- --------------------------------------------------------------------------------------------------- -- #
+
+pandas>=1.1.0
+numpy>=1.19.1
+jupyter>=1.0.0
