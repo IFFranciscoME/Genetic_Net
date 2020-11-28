@@ -37,5 +37,14 @@ table_1 = dt.ohlc_data.describe()
 
 # in quarters obtain 4 folds for each year
 t_folds = fn.t_folds(p_data=dt.ohlc_data, p_period='quarter')
-# drop the last quarter
+# drop the last quarter because it is incomplete until december 31
 t_folds.pop('q_04_2020', None)
+
+# -------------------------------------------------------- PROCESS: Feratures - Train/Optimizatio - Test -- #
+# -------------------------------------------------------- --------------------------------------------- -- #
+
+# models names
+models = ['logistic-elasticnet', 'ls-svm', 'ann-mlp']
+
+# main data structure for calculations
+memory_palace = {j: {i: {'pop': [], 'logs': [], 'hof': [], 'e_hof': []} for i in t_folds} for j in models}
