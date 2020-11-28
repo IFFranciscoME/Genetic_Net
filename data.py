@@ -1,10 +1,11 @@
 
 """
 # -- --------------------------------------------------------------------------------------------------- -- #
-# -- proyecto: UNA DESCRIPCION CORTA DEL PROYECTO                                                        -- #
-# -- archivo: data.py : funciones para entrada y salida de datos                                         -- #
-# -- autor: IFFranciscoME - franciscome@iteso.mx                                                         -- #
-# -- licencia: GPL-3.0 License                                                                           -- #
-# -- repositorio: https://github.com/IFFranciscoME/ada_proyecto                                          -- #
+# -- project: Trading System with Genetic Programming for Feature Engineering, Multilayer Perceptron     -- #
+# -- -------  Neural Network Predictive Model and Genetic Algorithms for Hyperparameter Optimization     -- #
+# -- file: data.py : input and output data functions for the project                                     -- #
+# -- author: IFFranciscoME - franciscome@iteso.mx                                                        -- #
+# -- license: GPL-3.0 License                                                                            -- #
+# -- repository: https://github.com/IFFranciscoME/Genetic_Net                                            -- #
 # -- --------------------------------------------------------------------------------------------------- -- #
 """
