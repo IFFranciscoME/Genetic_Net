@@ -12,6 +12,7 @@
 
 import visualizations as vs
 import data as dt
+import functions as fn
 
 # --------------------------------------------------------------- PLOT 1: PRECIOS OHLC DE FUTURO USD/MXN -- #
 # --------------------------------------------------------------- -------------------------------------- -- #
@@ -30,3 +31,11 @@ plot_1 = vs.g_ohlc(p_ohlc=dt.ohlc_data, p_theme=dt.theme_plot_1, p_vlines=None)
 
 # data description
 table_1 = dt.ohlc_data.describe()
+
+# --------------------------------------------------------- Timeseries T-Folds Blocks Without Filtration -- #
+# --------------------------------------------------------- -------------------------------------------- -- #
+
+# in quarters obtain 4 folds for each year
+t_folds = fn.t_folds(p_data=dt.ohlc_data, p_period='quarter')
+# drop the last quarter
+t_folds.pop('q_04_2020', None)

@@ -70,6 +70,9 @@ ohlc_data = pd.concat([price_data[list(price_data.keys())[5]], price_data[list(p
                        price_data[list(price_data.keys())[7]], price_data[list(price_data.keys())[8]],
                        price_data[list(price_data.keys())[9]], price_data[list(price_data.keys())[10]]])
 
+# reset index
+ohlc_data.reset_index(inplace=True, drop=True)
+
 # ----------------------------------------------------------------------- Hyperparameters for the Models -- #
 # ----------------------------------------------------------------------- ------------------------------ -- #
 
