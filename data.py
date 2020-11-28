@@ -15,8 +15,8 @@ from os import listdir, path
 from os.path import isfile, join
 
 
-# ------------------------------------------------------------------------------ Agrupamiento de precios -- #
-# ------------------------------------------------------------------------------ ----------------------- -- #
+# -------------------------------------------------------------------- Historical Minute Prices Grouping -- #
+# -------------------------------------------------------------------- --------------------------------- -- #
 
 def group_daily():
     main_path_g = 'files/daily_prices/'
@@ -48,14 +48,16 @@ def group_daily():
     return r_data
 
 
-# ----------------------------------------------------------------------------------- Lectura de precios -- #
-# ----------------------------------------------------------------------------------- ------------------ -- #
+# ---------------------------------------------------------------------------- Historical Prices Reading -- #
+# ---------------------------------------------------------------------------- ------------------------- -- #
 
+# path in order to read files
 main_path = 'files/daily_prices/'
 abspath_f = path.abspath(main_path)
 files_f = sorted([f for f in listdir(abspath_f) if isfile(join(abspath_f, f))])
 price_data = {}
 
+# iterative data reading
 for file_f in files_f:
     data_f = pd.read_csv(main_path + file_f)
     data_f['timestamp'] = pd.to_datetime(data_f['timestamp'])
@@ -63,12 +65,13 @@ for file_f in files_f:
     for year_f in years_f:
         price_data['MP_D_' + year_f] = data_f
 
-datos = pd.concat([price_data[list(price_data.keys())[5]], price_data[list(price_data.keys())[6]],
-                   price_data[list(price_data.keys())[7]], price_data[list(price_data.keys())[8]],
-                   price_data[list(price_data.keys())[9]], price_data[list(price_data.keys())[10]]])
+# whole data sets integrated
+ohlc_data = pd.concat([price_data[list(price_data.keys())[5]], price_data[list(price_data.keys())[6]],
+                       price_data[list(price_data.keys())[7]], price_data[list(price_data.keys())[8]],
+                       price_data[list(price_data.keys())[9]], price_data[list(price_data.keys())[10]]])
 
-# --------------------------------------------------------------------------- Hyperparametros de modelos -- #
-# --------------------------------------------------------------------------- -------------------------- -- #
+# ----------------------------------------------------------------------- Hyperparameters for the Models -- #
+# ----------------------------------------------------------------------- ------------------------------ -- #
 
 # data dictionary for models and their respective hyperparameter value candidates
 models = {'model_1': {'label': 'logistic-elasticnet',
@@ -94,38 +97,38 @@ models = {'model_1': {'label': 'logistic-elasticnet',
                                                      0.2, 0.1, 0.01, 0.001, 0.0001]}}}
 
 
-# ----------------------------------------------------------------------------- Temas para visualizacion -- #
-# ----------------------------------------------------------------------------- ------------------------ -- #
+# ------------------------------------------------------------------------------------- Themes for plots -- #
+# ------------------------------------------------------------------------------------- ---------------- -- #
 
-# grafica OHLC con precios originales
+# Plot_1 : Original Historical OHLC prices
 theme_plot_1 = dict(p_colors={'color_1': '#6b6b6b', 'color_2': '#ABABAB', 'color_3': '#ABABAB'},
                     p_fonts={'font_title': 22, 'font_axis': 14, 'font_ticks': 12},
                     p_dims={'width': 800, 'height': 400},
                     p_labels={'title': 'Precios OHLC',
                               'x_title': 'Fechas', 'y_title': 'Futuros USD/MXN'})
 
-# grafica OHLC + Lineas Verticales para M-Folds
+# Plot_2 : Timeseries T-Folds blocks without filtration
 theme_plot_2 = dict(p_colors={'color_1': '#6b6b6b', 'color_2': '#ABABAB', 'color_3': '#ABABAB'},
                     p_fonts={'font_title': 12, 'font_axis': 12, 'font_ticks': 12},
                     p_dims={'width': 1450, 'height': 800},
                     p_labels={'title': 'T-Folds por Bloques Sin Filtraciones',
                               'x_title': 'Fechas', 'y_title': 'Futuros USD/MXN'})
 
-# Barras de Clasificaciones Observadas Vs Clasificaciones de modelo
+# Plot_3 Observed Class vs Predicted Class
 theme_plot_3 = dict(p_colors={'color_1': '#6b6b6b', 'color_2': '#ABABAB', 'color_3': '#ABABAB'},
                     p_fonts={'font_title': 12, 'font_axis': 12, 'font_ticks': 12},
                     p_dims={'width': 1450, 'height': 800},
                     p_labels={'title': 'Clasificaciones',
                               'x_title': 'Fechas', 'y_title': 'Clasificacion'})
 
-# Series de Tiempo de las AUC de los modelos
+# Plot_4 ROC of models
 theme_plot_4 = dict(p_colors={'color_1': '#6b6b6b', 'color_2': '#ABABAB', 'color_3': '#ABABAB'},
                     p_fonts={'font_title': 12, 'font_axis': 12, 'font_ticks': 12},
                     p_dims={'width': 1450, 'height': 800},
                     p_labels={'title': 'ROC (Test Data)',
                               'x_title': 'FPR', 'y_title': 'TPR'})
 
-# Series de Tiempo de las AUC de los modelos
+# Plot_5 AUC Timeseries of models
 theme_plot_5 = dict(p_colors={'color_1': '#6b6b6b', 'color_2': '#ABABAB', 'color_3': '#ABABAB'},
                     p_fonts={'font_title': 12, 'font_axis': 12, 'font_ticks': 12},
                     p_dims={'width': 1450, 'height': 800},

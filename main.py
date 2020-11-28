@@ -17,10 +17,16 @@ import data as dt
 # --------------------------------------------------------------- -------------------------------------- -- #
 
 # plot 1 : time series candlesticks OHLC historical prices
-plot_1 = vs.g_ohlc(p_ohlc=dt.datos, p_theme=dt.theme_plot_1, p_vlines=None)
+plot_1 = vs.g_ohlc(p_ohlc=dt.ohlc_data, p_theme=dt.theme_plot_1, p_vlines=None)
 
 # show plot in explorer
 # plot_1.show()
 
 # generate the plot online with chart studio
 # py.plot(plot_1)
+
+# ------------------------------------------------------------------- TABLE 1: Exploratory Data Analysis -- #
+# ------------------------------------------------------------------- ---------------------------------- -- #
+
+# data description
+table_1 = dt.ohlc_data.describe()
