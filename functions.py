@@ -225,8 +225,8 @@ def symbolic_features(p_x, p_y):
     """
 
     # funcion de generacion de variables simbolicas
-    model = SymbolicTransformer(function_set=["sub", "add", 'inv', 'mul', 'div', 'abs', 'log'],
-                                population_size=5000, hall_of_fame=100, n_components=20,
+    model = SymbolicTransformer(function_set=["sub", "add", 'inv', 'mul', 'div', 'abs', 'log', 'sqrt'],
+                                population_size=6000, hall_of_fame=60, n_components=20,
                                 generations=50, tournament_size=20,  stopping_criteria=.60,
                                 const_range=None, init_method='half and half', init_depth=(4, 16),
                                 metric='pearson', parsimony_coefficient=0.01,

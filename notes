@@ -1,0 +1,32 @@
+
+# -- --------------------------------------------------------------------------------------------------- -- #
+# -- project: Trading System with Genetic Programming for Feature Engineering, Multilayer Perceptron     -- #
+# -- -------  Neural Network Predictive Model and Genetic Algorithms for Hyperparameter Optimization     -- #
+# -- file: notes.txt : Notes in spanish about the main components of the project                         -- #
+# -- author: IFFranciscoME - franciscome@iteso.mx                                                        -- #
+# -- license: GPL-3.0 License                                                                            -- #
+# -- repository: https://github.com/IFFranciscoME/Genetic_Net                                            -- #
+# -- --------------------------------------------------------------------------------------------------- -- #
+
+# -- Datos
+
+Son precios historicos de contratos "Futuros", un tipo especial de contrato financiero denominado
+"Derivado Financiero". Se obtuvo de la fuente oficial, la bolsa de derivados del Chicago Mercantile Exchange.
+Se obtuvo por periodos de minutos y se hizo el codigo para agruparlo en periodos de dias.
+
+# -- Bloques de series de tiempo Secuenciales Sin Filtraciones
+
+Se dividen los precios por periodos trimestrales (calendario) y para cada periodo se utiliza
+70% de los datos para entrenamiento y 30% para validacion. Para cada periodo se hace el proceso de
+ingenieria de variables, ajuste de modelos, optimizacion de hiperparametros y calculo de metricas de
+desempeño de todos los modelos predictivos.
+
+# -- Programacion Genetica (Ingenieria de Variables)
+
+# -- Algoritmos Geneticos (Optimizacion de Hiperparametros)
+
+# -- Red Neuronal Perceptron Multicapa con Retropropagacion (Clasificacion)
+
+# -- Regresion Logistica con Regularizacion tipo Elastic Net (Clasificacion)
+
+# -- Maquinas de Soporte Vectorial (Clasificacion)
