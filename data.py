@@ -51,6 +51,10 @@ def group_daily():
 # ---------------------------------------------------------------------------- Historical Prices Reading -- #
 # ---------------------------------------------------------------------------- ------------------------- -- #
 
+# the price in the file is expressed as the USD to purchas one MXN
+# if is needed to convert to the inverse, the MXN to purchas one USD, uncomment the following line
+mode = 'MXN_USD'
+
 # path in order to read files
 main_path = 'files/daily_prices/'
 abspath_f = path.abspath(main_path)
@@ -61,6 +65,13 @@ price_data = {}
 for file_f in files_f:
     data_f = pd.read_csv(main_path + file_f)
     data_f['timestamp'] = pd.to_datetime(data_f['timestamp'])
+
+    if mode == 'MXN_USD':
+        data_f['open'] = 1 / data_f['open']
+        data_f['high'] = 1 / data_f['high']
+        data_f['low'] = 1 / data_f['low']
+        data_f['close'] = 1 / data_f['close']
+
     years_f = set([str(datadate.year) for datadate in list(data_f['timestamp'])])
     for year_f in years_f:
         price_data['MP_D_' + year_f] = data_f

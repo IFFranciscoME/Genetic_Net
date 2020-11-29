@@ -15,7 +15,7 @@ import data as dt
 import functions as fn
 
 
-# --------------------------------------------------------------- PLOT 1: PRECIOS OHLC DE FUTURO USD/MXN -- #
+# ------------------------------------------------------------- PLOT 1: MXN/USD Historical Future Prices -- #
 # --------------------------------------------------------------- -------------------------------------- -- #
 
 # plot 1 : time series candlesticks OHLC historical prices
