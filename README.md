@@ -1,6 +1,6 @@
 ## Description
-*Insert here a brief description of the project, including, purpose, technologies used and context 
-where it was created.*
+This project was created for the class: Design and Analysis of Algorithms, an elective class for the
+Masters in Science in Data Science, offered by ITESO university.
 
 ## Install dependencies
 
@@ -10,12 +10,21 @@ Install all the dependencies stated in the requirements.txt file, just run the f
         
 Or you can manually install one by one using the name and version in the file.
 
-## Funcionalities
+## Functionalities
 
-*Add here examples of core functionalities for the project in this repository.*
+- Autoregressive Feature Generation (**autoregressive_features**)
+- Hadamard Product for Feature Generation (**hadamard_features**)
+- Genetic Programming for Symbolic Operations for Feature Generation (**symbolic_features**)
+- Timeseries Block Folds without filtration (**t_folds**)
+- Classifier model: Logistic Regression with Elastic Net Regularization (**logistic_net**)
+- Classifier model: Least Squares Support Vector Machines (**ls_svm**)
+- Classifier model: Artificial Neural Net Multilayer Perceptron (**ann_mlp**)
+- Genetic Algorithms Optimization (**genetic_algo_optimisation**)
+- Plotly visualizations of results (**visualizations.py**)
+- Machine Learning Models Performance Metrics (**t_folds**)
 
 ## Author
-*Add Name and a brief description on who you are.*
+B.Eng in Financial Engineering and Soon to be M.Sc in Data Science, Juan Francisco Muñoz-Elguezabal
 
 ## License
 **GNU General Public License v3.0** 
@@ -26,4 +35,4 @@ works using a licensed work, under the same license. Copyright and license notic
 must be preserved. Contributors provide an express grant of patent rights.*
 
 ## Contact
-*For more information in reggards of this repo, please contact name@email.com*
+*For more information in reggards of this project, please contact franciscome@iteso.mx*
