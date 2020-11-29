@@ -77,35 +77,36 @@ ohlc_data.reset_index(inplace=True, drop=True)
 # ----------------------------------------------------------------------- ------------------------------ -- #
 
 # data dictionary for models and their respective hyperparameter value candidates
-models = {'model_1': {'label': 'logistic-elasticnet',
-                      'params': {'ratio': [0.05, 0.10, 0.20, 0.30, 0.50, 0.60, 0.70, 0.80, 0.90, 1.00],
-                                 'c': [1.5, 1.1, 1, 0.8, 0.5, 1.5, 1.1, 1, 0.8, 0.5]}},
-
-          'model_2': {'label': 'ls-svm',
-                      'params': {'c': [1.5, 1.1, 1, 0.8, 0.5, 1.5, 1.1, 1, 0.8, 0.5],
-                                 'kernel': ['linear', 'linear', 'linear', 'linear', 'linear',
-                                            'rbf', 'rbf', 'rbf', 'rbf', 'rbf'],
-                                 'gamma': ['scale', 'scale', 'scale', 'scale', 'scale',
-                                           'auto', 'auto', 'auto', 'auto', 'auto']}},
-
-          'model_3': {'label': 'ann-mlp',
-                      'params': {'hidden_layers': [(10, ), (20, ), (5, 5), (20, 20), (50, ),
-                                                   (10, ), (10, ), (5, 5), (10, 10), (20, )],
-                                 'activation': ['relu', 'relu', 'relu', 'relu', 'relu',
-                                                'logistic', 'logistic', 'logistic', 'logistic', 'logistic'],
-                                 'alpha': [0.2, 0.1, 0.01, 0.001, 0.0001, 0.2, 0.1, 0.01, 0.001, 0.0001],
-                                 'learning_r': ['constant', 'constant', 'constant', 'constant', 'constant',
-                                                'adaptive', 'adaptive', 'adaptive', 'adaptive', 'adaptive'],
-                                 'learning_r_init': [0.2, 0.1, 0.01, 0.001, 0.0001,
-                                                     0.2, 0.1, 0.01, 0.001, 0.0001]}}}
-
+models = {
+    'logistic-elasticnet': {
+        'label': 'logistic-elasticnet',
+        'params': {'ratio': [0.05, 0.10, 0.20, 0.30, 0.50, 0.60, 0.70, 0.80, 0.90, 1.00],
+                   'c': [1.5, 1.1, 1, 0.8, 0.5, 1.5, 1.1, 1, 0.8, 0.5]}},
+    'ls-svm': {
+        'label': 'ls-svm',
+        'params': {'c': [1.5, 1.1, 1, 0.8, 0.5, 1.5, 1.1, 1, 0.8, 0.5],
+                   'kernel': ['linear', 'linear', 'linear', 'linear', 'linear',
+                              'rbf', 'rbf', 'rbf', 'rbf', 'rbf'],
+                   'gamma': ['scale', 'scale', 'scale', 'scale', 'scale',
+                             'auto', 'auto', 'auto', 'auto', 'auto']}},
+    'ann-mlp': {
+        'label': 'ann-mlp',
+        'params': {'hidden_layers': [(10, ), (20, ), (5, 5), (20, 20), (50, ),
+                                     (10, ), (10, ), (5, 5), (10, 10), (20, )],
+                   'activation': ['relu', 'relu', 'relu', 'relu', 'relu',
+                                  'logistic', 'logistic', 'logistic', 'logistic', 'logistic'],
+                   'alpha': [0.2, 0.1, 0.01, 0.001, 0.0001, 0.2, 0.1, 0.01, 0.001, 0.0001],
+                   'learning_r': ['constant', 'constant', 'constant', 'constant', 'constant',
+                                  'adaptive', 'adaptive', 'adaptive', 'adaptive', 'adaptive'],
+                   'learning_r_init': [0.2, 0.1, 0.01, 0.001, 0.0001,
+                                       0.2, 0.1, 0.01, 0.001, 0.0001]}}}
 
 # ------------------------------------------------------------------------------------- Themes for plots -- #
 # ------------------------------------------------------------------------------------- ---------------- -- #
 
 # Plot_1 : Original Historical OHLC prices
 theme_plot_1 = dict(p_colors={'color_1': '#6b6b6b', 'color_2': '#ABABAB', 'color_3': '#ABABAB'},
-                    p_fonts={'font_title': 22, 'font_axis': 14, 'font_ticks': 12},
+                    p_fonts={'font_title': 12, 'font_axis': 12, 'font_ticks': 12},
                     p_dims={'width': 800, 'height': 400},
                     p_labels={'title': 'Precios OHLC',
                               'x_title': 'Fechas', 'y_title': 'Futuros USD/MXN'})
@@ -113,27 +114,27 @@ theme_plot_1 = dict(p_colors={'color_1': '#6b6b6b', 'color_2': '#ABABAB', 'color
 # Plot_2 : Timeseries T-Folds blocks without filtration
 theme_plot_2 = dict(p_colors={'color_1': '#6b6b6b', 'color_2': '#ABABAB', 'color_3': '#ABABAB'},
                     p_fonts={'font_title': 12, 'font_axis': 12, 'font_ticks': 12},
-                    p_dims={'width': 1450, 'height': 800},
+                    p_dims={'width': 800, 'height': 400},
                     p_labels={'title': 'T-Folds por Bloques Sin Filtraciones',
                               'x_title': 'Fechas', 'y_title': 'Futuros USD/MXN'})
 
 # Plot_3 Observed Class vs Predicted Class
 theme_plot_3 = dict(p_colors={'color_1': '#6b6b6b', 'color_2': '#ABABAB', 'color_3': '#ABABAB'},
                     p_fonts={'font_title': 12, 'font_axis': 12, 'font_ticks': 12},
-                    p_dims={'width': 1450, 'height': 800},
+                    p_dims={'width': 800, 'height': 400},
                     p_labels={'title': 'Clasificaciones',
                               'x_title': 'Fechas', 'y_title': 'Clasificacion'})
 
 # Plot_4 ROC of models
 theme_plot_4 = dict(p_colors={'color_1': '#6b6b6b', 'color_2': '#ABABAB', 'color_3': '#ABABAB'},
                     p_fonts={'font_title': 12, 'font_axis': 12, 'font_ticks': 12},
-                    p_dims={'width': 1450, 'height': 800},
+                    p_dims={'width': 800, 'height': 400},
                     p_labels={'title': 'ROC (Test Data)',
                               'x_title': 'FPR', 'y_title': 'TPR'})
 
 # Plot_5 AUC Timeseries of models
 theme_plot_5 = dict(p_colors={'color_1': '#6b6b6b', 'color_2': '#ABABAB', 'color_3': '#ABABAB'},
                     p_fonts={'font_title': 12, 'font_axis': 12, 'font_ticks': 12},
-                    p_dims={'width': 1450, 'height': 800},
+                    p_dims={'width': 800, 'height': 400},
                     p_labels={'title': 'AUC por periodo (Test Data)',
                               'x_title': 'Periodos', 'y_title': 'AUC'})
