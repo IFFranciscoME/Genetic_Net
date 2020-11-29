@@ -40,8 +40,8 @@ t_folds = fn.t_folds(p_data=dt.ohlc_data, p_period='quarter')
 # drop the last quarter because it is incomplete until december 31
 t_folds.pop('q_04_2020', None)
 
-# -------------------------------------------------------- PROCESS: Feratures - Train/Optimizatio - Test -- #
-# -------------------------------------------------------- --------------------------------------------- -- #
+# ----------------------------------------------------------------- Features - Train/Optimization - Test -- #
+# ----------------------------------------------------------------- ------------------------------------ -- #
 
 # models names
 models = ['logistic-elasticnet', 'ls-svm', 'ann-mlp']
