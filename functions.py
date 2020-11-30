@@ -1103,7 +1103,7 @@ def model_evaluations(p_features, p_optim_data, p_model):
 # -------------------------------------------------------------------------- Model Evaluations by period -- #
 # --------------------------------------------------------------------------------------------------------- #
 
-def global_evaluations(p_data_folds, p_models, p_saving, p_file_name):
+def folds_evaluations(p_data_folds, p_models, p_saving, p_file_name):
     """
     Global evaluations for specified data folds for specified models
 
@@ -1125,7 +1125,7 @@ def global_evaluations(p_data_folds, p_models, p_saving, p_file_name):
 
     # main data structure for calculations
     memory_palace = {j: {i: {'pop': [], 'logs': [], 'hof': [], 'e_hof': [], 'time': []}
-                         for i in t_folds} for j in list(dt.models.keys())}
+                         for i in p_data_folds} for j in list(dt.models.keys())}
 
     # cycle to iterate all periods for all models
     for period in p_data_folds:
@@ -1170,7 +1170,7 @@ def global_evaluations(p_data_folds, p_models, p_saving, p_file_name):
 
     if p_saving:
         # objects to be saved
-        pickle_rick = {'data': dt.ohlc_data, 'm_folds': p_data_folds, 'memory_palace': memory_palace}
+        pickle_rick = {'data': dt.ohlc_data, 't_folds': p_data_folds, 'memory_palace': memory_palace}
 
         # pickle format function
         dt.data_save_load(p_data_objects=pickle_rick,
@@ -1178,3 +1178,109 @@ def global_evaluations(p_data_folds, p_models, p_saving, p_file_name):
                           p_data_action='save')
 
     return memory_palace
+
+
+# -------------------------------------------------------------------------- Model AUC Min and Max Cases -- #
+# --------------------------------------------------------------------------------------------------------- #
+
+def models_auc(p_models, p_global_cases, p_data_folds):
+    """
+    AUC min and max cases for the models
+
+    Parameters
+    ----------
+    p_models: list
+        with the models name
+
+    p_global_cases: dict
+        With all the info for the global cases
+
+    Returns
+    -------
+    auc_cases:dict
+        with all the info of the min and the max case for every model
+
+    """
+
+    # diccionario para almacenar resultados de busqueda
+    auc_cases = {j: {i: {'data': {}}
+                     for i in ['auc_min', 'auc_max', 'hof_metrics']} for j in p_models}
+
+    # ciclo para busqueda de auc_min y auc_max
+    for model in p_models:
+        auc_min = 1
+        auc_max = 0
+        auc_max_params = {}
+        auc_min_params = {}
+        for period in p_data_folds:
+            auc_cases[model]['hof_metrics']['data'][period] = {}
+            auc_s = []
+            for i in range(0, 10):
+                auc_s.append(p_global_cases[model][period]['e_hof'][i]['metrics']['test']['auc'])
+
+                # -- caso 1
+                # El individuo de todos los HOF de todos los periodos que produjo la minima AUC
+                if p_global_cases[model][period]['e_hof'][i]['metrics']['test']['auc'] < auc_min:
+                    auc_min = p_global_cases[model][period]['e_hof'][i]['metrics']['test']['auc']
+                    auc_cases[model]['auc_min']['data'] = p_global_cases[model][period]['e_hof'][i]
+                    auc_min_params = p_global_cases[model][period]['e_hof'][i]['params']
+
+                # -- caso 2
+                # El individuo de todos los HOF de todos los periodos que produjo la maxima AUC
+                elif p_global_cases[model][period]['e_hof'][i]['metrics']['test']['auc'] > auc_max:
+                    auc_max = p_global_cases[model][period]['e_hof'][i]['metrics']['test']['auc']
+                    auc_cases[model]['auc_max']['data'] = p_global_cases[model][period]['e_hof'][i]
+                    auc_max_params = p_global_cases[model][period]['e_hof'][i]['params']
+
+            # Guardar info por periodo
+            auc_cases[model]['hof_metrics']['data'][period]['auc_s'] = auc_s
+            auc_cases[model]['hof_metrics']['data'][period]['auc_max'] = auc_max
+            auc_cases[model]['hof_metrics']['data'][period]['auc_max_params'] = auc_max_params
+            auc_cases[model]['hof_metrics']['data'][period]['auc_min'] = auc_min
+            auc_cases[model]['hof_metrics']['data'][period]['auc_min_params'] = auc_min_params
+
+    return auc_cases
+
+
+# ------------------------------------------------------------------------------ Model Global Evaluation -- #
+# --------------------------------------------------------------------------------------------------------- #
+
+def model_evaluation(p_features, p_models, p_cases):
+    """
+    Evaluation of models with global data and features for particular selected cases of parameters
+
+    Parameters
+    ----------
+    p_features: pd.DataFrame
+        with all the features (inputs)
+
+    p_models: list
+        with the models name
+
+    p_cases: dict
+        with the information of the min and max AUC cases
+
+    Returns
+    -------
+    global_auc_cases: dict
+        with the evaluations
+
+    """
+
+    # Evaluation of auc_min and auc_max cases in all the models
+    global_auc_cases = {model: {'auc_min': {}, 'auc_max': {}} for model in p_models}
+
+    # Evaluate all global cases
+    for model in p_models:
+        for case in ['auc_min', 'auc_max']:
+            if model == 'logistic-elasticnet':
+                global_auc_cases[model][case] = logistic_net(p_data=p_features,
+                                                             p_params=p_cases[model][case]['data']['params'])
+            elif model == 'ls-svm':
+                global_auc_cases[model][case] = ls_svm(p_data=p_features,
+                                                       p_params=p_cases[model][case]['data']['params'])
+            elif model == 'ann-mlp':
+                global_auc_cases[model][case] = ann_mlp(p_data=p_features,
+                                                        p_params=p_cases[model][case]['data']['params'])
+
+    return global_auc_cases

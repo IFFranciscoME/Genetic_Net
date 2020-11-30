@@ -88,7 +88,7 @@ def g_ohlc(p_ohlc, p_theme, p_vlines):
     # Color and font type for text in axes
     fig_g_ohlc.update_layout(xaxis=dict(titlefont=dict(color=p_theme['p_colors']['color_1']),
                                         tickfont=dict(color=p_theme['p_colors']['color_1'],
-                                                      size=p_theme['p_fonts']['font_axis']), showgrid=False),
+                                                      size=p_theme['p_fonts']['font_axis']), showgrid=True),
                              yaxis=dict(zeroline=False, automargin=True,
                                         titlefont=dict(color=p_theme['p_colors']['color_1']),
                                         tickfont=dict(color=p_theme['p_colors']['color_1'],
@@ -128,3 +128,235 @@ def g_ohlc(p_ohlc, p_theme, p_vlines):
     fig_g_ohlc.layout.height = p_theme['p_dims']['height']
 
     return fig_g_ohlc
+
+
+# -- --------------------------------------------------------------------- PLOT: Stacked Horizontal Bars -- #
+# -- --------------------------------------------------------------------------------------------------- -- #
+
+def g_relative_bars(p_x, p_y0, p_y1, p_theme):
+    """
+    Generates a plot with two bars (two series of values) and two horizontal lines (medians of each
+    series)
+
+    Requirements
+    ------------
+    numpy
+    pandas
+    plotly
+
+    Parameters
+    ----------
+    p_x : list
+        lista con fechas o valores en el eje de x
+
+    p_y0: dict
+        values for upper bar plot
+        {data: y0 component to plot (left axis), color: for this data, type: line/dash/dash-dot,
+        size: for this data, n_ticks: number of ticks for this axis}
+
+    p_y1: dict
+        values for lower bar plot
+        {data: y0 component to plot (right axis), color: for this data, type: line/dash/dash-dot,
+        size: for this data, n_ticks: number of ticks for this axis}
+
+    p_theme: dict
+        colors and font sizes
+        {'color_1': '#ABABAB', 'color_2': '#ABABAB', 'color_3': '#ABABAB', 'font_color_1': '#ABABAB',
+        'font_size_1': 12, 'font_size_2': 16}
+
+    Returns
+    -------
+    fig_relative_bars: plotly
+        Object with plotly generating code for the plot
+
+    """
+
+    # instantiate a figure object
+    fig_relative_bars = go.Figure()
+
+    # Add lower bars
+    fig_relative_bars.add_trace(go.Bar(name='Prediccion de Modelo', x=p_x, y=p_y1,
+                                       marker_color='red',
+                                       marker_line_color='red',
+                                       marker_line_width=1, opacity=0.99))
+
+    # Add upper bars
+    fig_relative_bars.add_trace(go.Bar(name='Observacion', x=p_x, y=p_y0,
+                                       marker_color='grey',
+                                       marker_line_color='grey',
+                                       marker_line_width=1, opacity=0.99))
+
+    # Update layout for the background
+    fig_relative_bars.update_layout(paper_bgcolor='white',
+                                    yaxis=dict(tickvals=[-1, 0, 1], zeroline=True, automargin=True,
+                                               tickfont=dict(color='grey',
+                                                             size=p_theme['p_fonts']['font_axis'])),
+                                    xaxis=dict(tickfont=dict(color='grey',
+                                                             size=p_theme['p_fonts']['font_axis'])))
+
+    # Update layout for the y axis
+    fig_relative_bars.update_yaxes(showgrid=False, range=[-1.05, 1.05])
+
+    # Legend format
+    fig_relative_bars.update_layout(paper_bgcolor='white', plot_bgcolor='white', barmode='overlay',
+                                    legend=go.layout.Legend(x=.41, y=-.10, orientation='h',
+                                                            font=dict(size=14, color='grey')),
+                                    margin=go.layout.Margin(l=20, r=20, b=20, t=20, pad=20))
+
+    # Update layout for the background
+    fig_relative_bars.update_layout(title_font_size=p_theme['p_fonts']['font_title'],
+                                    title=dict(x=0.5,
+                                               text='Grafica 3:' + '<b> ' +
+                                                    p_theme['p_labels']['title'] + ' </b>'),
+                                    yaxis=dict(titlefont=dict(size=p_theme['p_fonts']['font_axis'] + 4)),
+                                    xaxis=dict(titlefont=dict(size=p_theme['p_fonts']['font_axis'] + 4)))
+
+    # Final plot dimensions
+    fig_relative_bars.layout.autosize = True
+    fig_relative_bars.layout.width = p_theme['p_dims']['width']
+    fig_relative_bars.layout.height = p_theme['p_dims']['height']
+
+    return fig_relative_bars
+
+
+# -- ----------------------------------------------------------------------------------- PLOT: ROC + ACU -- #
+# -- --------------------------------------------------------------------------------------------------- -- #
+
+def g_roc_auc(p_cases, p_models, p_type, p_theme):
+
+    # p_casos = casos
+    fig_rocs = go.Figure()
+    fig_rocs.update_layout(
+        title=dict(x=0.5, text='Grafica 4:' + '<b> ' +
+                               p_theme['p_labels']['title'] + ' - ' + p_type + ' data' + ' </b>'),
+        xaxis=dict(title_text=p_theme['p_labels']['x_title'],
+                   tickfont=dict(color='grey', size=p_theme['p_fonts']['font_axis'])),
+        yaxis=dict(title_text=p_theme['p_labels']['y_title'],
+                   tickfont=dict(color='grey', size=p_theme['p_fonts']['font_axis'])))
+
+    fig_rocs.add_shape(type='line', line=dict(width=3, dash='dash', color='grey'), x0=0, x1=1, y0=0, y1=1)
+
+    for model in p_models:
+        for auc_type in ['auc_min', 'auc_max']:
+            p_fpr = p_cases[model][auc_type]['data']['metrics'][p_type]['fpr']
+            p_tpr = p_cases[model][auc_type]['data']['metrics'][p_type]['tpr']
+
+            if auc_type == 'auc_min':
+                fig_rocs.add_trace(go.Scatter(x=p_fpr, y=p_tpr, name=model,
+                                              mode='lines+markers', line=dict(width=2, color='red')))
+            elif auc_type == 'auc_max':
+                fig_rocs.add_trace(go.Scatter(x=p_fpr, y=p_tpr, name=model,
+                                              mode='lines+markers', line=dict(width=2, color='blue')))
+
+    # Formato para titulo
+    fig_rocs.update_layout(legend=go.layout.Legend(x=.090, y=-0.11, orientation='h',
+                                                     bordercolor='dark grey',
+                                                     borderwidth=1,
+                                                     font=dict(size=12)))
+
+    # Formato de tamanos
+    fig_rocs.layout.autosize = True
+    fig_rocs.layout.width = p_theme['p_dims']['width']
+    fig_rocs.layout.height = p_theme['p_dims']['height']
+
+    return fig_rocs
+
+
+# -- ----------------------------------------------------------------------------------- PLOT: ROC + ACU -- #
+# -- --------------------------------------------------------------------------------------------------- -- #
+
+def g_timeseries_auc(p_data_auc, p_theme):
+    """
+    Plot para series de tiempo de las AUC de los modelos
+
+    Parameters
+    ----------
+    p_data_auc:dict
+        Diccionario con datos para plot de series de tiempo AUC
+        p_data_auc = minmax_auc_test
+
+    p_theme: dict
+        Diccionario con informacion de tema para plot
+        p_theme = theme_plot_4
+
+    Returns
+    -------
+    fig_ts_auc: plotly
+        Objeto tipo plotly para utilizar con .show()
+
+    """
+
+    fig_ts_auc = go.Figure()
+    fig_ts_auc.update_layout(
+        title=dict(x=0.5, text='Grafica 5:' + '<b> ' + p_theme['p_labels']['title'] + ' </b>'),
+        xaxis=dict(title_text=p_theme['p_labels']['x_title'],
+                   tickfont=dict(color='grey', size=p_theme['p_fonts']['font_axis'])),
+        yaxis=dict(title_text=p_theme['p_labels']['y_title'],
+                   tickfont=dict(color='grey', size=p_theme['p_fonts']['font_axis'])))
+
+    fig_ts_auc.add_trace(go.Scatter(x=p_data_auc['logistic-elasticnet']['x_period'],
+                                    y=p_data_auc['logistic-elasticnet']['y_mins'],
+
+                                    line=dict(color='#004A94', width=3),
+                                    marker=dict(color='#004A94', size=9),
+                                    name='logistic-elasticnet (min)',
+                                    mode='markers+lines'))
+
+    fig_ts_auc.add_trace(go.Scatter(x=p_data_auc['logistic-elasticnet']['x_period'], fillcolor='blue',
+                                    y=p_data_auc['logistic-elasticnet']['y_maxs'],
+
+                                    line=dict(color='#004A94', width=3),
+                                    marker=dict(color='#004A94', size=9),
+                                    name='logistic-elasticnet (max)',
+                                    mode='markers+lines'))
+
+    fig_ts_auc.add_trace(go.Scatter(x=p_data_auc['ls-svm']['x_period'],
+                                    y=p_data_auc['ls-svm']['y_mins'],
+
+                                    line=dict(color='#FB5D41', width=3),
+                                    marker=dict(color='#FB5D41', size=9),
+                                    name='ls-svm (min)',
+                                    mode='markers+lines'))
+
+    fig_ts_auc.add_trace(go.Scatter(x=p_data_auc['ls-svm']['x_period'],
+                                    y=p_data_auc['ls-svm']['y_maxs'],
+
+                                    line=dict(color='#FB5D41', width=3),
+                                    marker=dict(color='#FB5D41', size=9),
+                                    name='ls-svm (max)',
+                                    mode='markers+lines'))
+
+    fig_ts_auc.add_trace(go.Scatter(x=p_data_auc['ann-mlp']['x_period'],
+                                    y=p_data_auc['ann-mlp']['y_mins'],
+
+                                    line=dict(color='#339e62', width=3),
+                                    marker=dict(color='#339e62', size=9),
+                                    name='ann-mlp (min)',
+                                    mode='markers+lines'))
+
+    fig_ts_auc.add_trace(go.Scatter(x=p_data_auc['ann-mlp']['x_period'],
+                                    y=p_data_auc['ann-mlp']['y_maxs'],
+
+                                    line=dict(color='#339e62', width=3),
+                                    marker=dict(color='#339e62', size=9),
+                                    name='ann-mlp (min)',
+                                    mode='markers+lines'))
+
+    # # Update layout for the background
+    # fig_ts_auc.update_layout(paper_bgcolor='white', title_font_size=p_theme['p_theme']['font_title'],
+    #                          yaxis=dict(tickvals=np.arange(0, 1.1, 0.1), zeroline=False, automargin=True,
+    #                                     titlefont=dict(size=p_theme['p_theme']['font_axis']+4)),
+    #                          xaxis=dict(titlefont=dict(size=p_theme['p_theme']['font_axis']+4)))
+
+    # Formato para titulo
+    fig_ts_auc.update_layout(legend=go.layout.Legend(x=.1, y=-0.21, orientation='h',
+                                                     bordercolor='dark grey',
+                                                     borderwidth=1,
+                                                     font=dict(size=16)))
+
+    # Formato de tamanos
+    fig_ts_auc.layout.autosize = True
+    fig_ts_auc.layout.width = p_theme['p_dims']['width']
+    fig_ts_auc.layout.height = p_theme['p_dims']['height']
+
+    return fig_ts_auc

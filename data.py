@@ -157,7 +157,7 @@ theme_plot_3 = dict(p_colors={'color_1': '#6b6b6b', 'color_2': '#ABABAB', 'color
 theme_plot_4 = dict(p_colors={'color_1': '#6b6b6b', 'color_2': '#ABABAB', 'color_3': '#ABABAB'},
                     p_fonts={'font_title': 20, 'font_axis': 16, 'font_ticks': 12},
                     p_dims={'width': 1600, 'height': 800},
-                    p_labels={'title': 'ROC (Test Data)',
+                    p_labels={'title': 'ROC',
                               'x_title': 'FPR', 'y_title': 'TPR'})
 
 # Plot_5 AUC Timeseries of models

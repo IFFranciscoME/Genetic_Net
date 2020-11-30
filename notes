@@ -17,9 +17,11 @@ Se obtuvo por periodos de minutos y se hizo el codigo para agruparlo en periodos
 # -- Bloques de series de tiempo Secuenciales Sin Filtraciones
 
 Se dividen los precios por periodos trimestrales (calendario) y para cada periodo se utiliza
-70% de los datos para entrenamiento y 30% para validacion. Para cada periodo se hace el proceso de
-ingenieria de variables, ajuste de modelos, optimizacion de hiperparametros y calculo de metricas de
-desempeño de todos los modelos predictivos.
+70% de los datos para entrenamiento y 30% para validacion.
+
+* Acorde a "The Elements of Statistical Learning"
+Para cada periodo se hace el proceso de ingenieria de variables, ajuste de modelos, optimizacion de
+hiperparametros y calculo de metricas de desempeño de todos los modelos predictivos.
 
 # -- Programacion Genetica (Ingenieria de Variables)
 

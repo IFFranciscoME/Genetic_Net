@@ -14,7 +14,7 @@ import visualizations as vs
 import data as dt
 import functions as fn
 import warnings
-import pickle
+import pandas as pd
 warnings.filterwarnings("ignore")
 
 # ------------------------------------------------------------- PLOT 1: MXN/USD Historical Future Prices -- #
@@ -65,52 +65,110 @@ plot_2 = vs.g_ohlc(p_ohlc=dt.ohlc_data,
 # ----------------------------------------------------------------- Features - Train/Optimization - Test -- #
 # ----------------------------------------------------------------- ------------------------------------ -- #
 
+# list with the names of the models
+ml_models = list(dt.models.keys())
+
 # -- --------------------------------------------------------------- Run Process (WARNING - Takes Hours) -- #
-# ml_models = list(dt.models.keys())
-# global_cases = fn.global_evaluations(p_data_folds=t_folds, p_models=ml_models,
-#                                      p_saving=True, p_file_name='Genetic_Net_Data_Folds.dat')
+# global_evaluations = fn.folds_evaluations(p_data_folds=t_folds, p_models=ml_models,
+#                                           p_saving=True, p_file_name='Genetic_Net_Data_Folds.dat')
 
 # -- ------------------------------------------------------------------------- Load Data for offline use -- #
-global_cases = dt.data_save_load(p_data_objects=None, p_data_action='load',
-                                 p_data_file='Genetic_Net_Quarters.dat')
+global_evaluations = dt.data_save_load(p_data_objects=None, p_data_action='load',
+                                       p_data_file='files/pickle_rick/Genetic_Net_Quarters.dat')
 
-# -- -------------------------------------------------------------------- RESULTS: AUC Min and Max cases -- #
-# -- --------------------------------------------------------------------------- ----------------------- -- #
-# -- Funcion de casos representativos
+global_cases = global_evaluations['memory_palace']
+global_features = global_evaluations['global_features']
 
-# diccionario para almacenar resultados de busqueda
-auc_cases = {j: {i: {'data': {}}
-                 for i in ['auc_min', 'auc_max', 'hof_metrics']} for j in list(dt.models.keys())}
+# -- ----------------------------------------------------------------------------- AUC Min and Max cases -- #
+# -- ----------------------------------------------------------------------------- --------------------- -- #
 
-# ciclo para busqueda de auc_min y auc_max
-for model in list(dt.models.keys()):
-    auc_min = 1
-    auc_max = 0
-    auc_max_params = {}
-    auc_min_params = {}
-    for period in t_folds:
-        auc_cases[model]['hof_metrics']['data'][period] = {}
-        auc_s = []
-        for i in range(0, 10):
-            auc_s.append(global_cases[model][period]['e_hof'][i]['metrics']['test']['auc'])
+# min and max AUC cases for the models
+auc_cases = fn.models_auc(p_models=ml_models, p_global_cases=global_cases, p_data_folds=t_folds)
 
-            # -- caso 1
-            # El individuo de todos los HOF de todos los periodos que produjo la minima AUC
-            if global_cases[model][period]['e_hof'][i]['metrics']['test']['auc'] < auc_min:
-                auc_min = global_cases[model][period]['e_hof'][i]['metrics']['test']['auc']
-                auc_cases[model]['auc_min']['data'] = global_cases[model][period]['e_hof'][i]
-                auc_min_params = global_cases[model][period]['e_hof'][i]['params']
+# -- -------------------------------------------------------------------------- Model Global Performance -- #
+# -- ----------------------------------------------------------------------------- --------------------- -- #
 
-            # -- caso 2
-            # El individuo de todos los HOF de todos los periodos que produjo la maxima AUC
-            elif global_cases[model][period]['e_hof'][i]['metrics']['test']['auc'] > auc_max:
-                auc_max = global_cases[model][period]['e_hof'][i]['metrics']['test']['auc']
-                auc_cases[model]['auc_max']['data'] = global_cases[model][period]['e_hof'][i]
-                auc_max_params = global_cases[model][period]['e_hof'][i]['params']
+# model performance for all models, with the min and max AUC parameters
+global_auc_cases = fn.model_evaluation(p_features=global_features, p_models=ml_models, p_cases=auc_cases)
 
-        # Guardar info por periodo
-        auc_cases[model]['hof_metrics']['data'][period]['auc_s'] = auc_s
-        auc_cases[model]['hof_metrics']['data'][period]['auc_max'] = auc_max
-        auc_cases[model]['hof_metrics']['data'][period]['auc_max_params'] = auc_max_params
-        auc_cases[model]['hof_metrics']['data'][period]['auc_min'] = auc_min
-        auc_cases[model]['hof_metrics']['data'][period]['auc_min_params'] = auc_min_params
+# -- ------------------------------------------------------------- PLOT 3: Classification Global Results -- #
+# -- ----------------------------------------------------------------------------- --------------------- -- #
+
+obs_class = list(global_features['train_y']) + list(global_features['test_y'])
+obs_class = [-1 if x == 0 else 1 for x in obs_class]
+
+model_data = global_auc_cases['logistic-elasticnet']['auc_max']['results']['data']
+pred_class = list(model_data['train']['y_train_pred']) + list(model_data['test']['y_test_pred'])
+pred_class = [-1 if x == 0 else 1 for x in pred_class]
+x_series = list(dt.ohlc_data['timestamp'])
+
+# Classification results plot
+plot_3 = vs.g_relative_bars(p_x=x_series, p_y0=obs_class, p_y1=pred_class, p_theme=dt.theme_plot_3)
+
+# offline plot
+# plot_3.show()
+
+# online plot
+
+# -- ------------------------------------------------------------- PLOT 4: Classification Global Results -- #
+# -- ----------------------------------------------------------------------------- --------------------- -- #
+
+# Timeseries of the AUCs
+plot_4 = vs.g_roc_auc(p_cases=auc_cases, p_type='test', p_models=ml_models, p_theme=dt.theme_plot_4)
+
+# offline plot
+# plot_4.show()
+
+# online plot
+
+# -- ----------------------------------------------------------------- PLOT 5: Timeseries AUC for Models -- #
+# -- ----------------------------------------------------------------- --------------------------------- -- #
+
+minmax_auc_test = {i: {'x_period': [], 'y_mins': [], 'y_maxs': []} for i in ml_models}
+
+# get the cases where auc was min and max in all the periods
+for model in ml_models:
+    minmax_auc_test[model]['x_period'] = list(auc_cases[model]['hof_metrics']['data'].keys())
+    minmax_auc_test[model]['y_mins'] = [auc_cases[model]['hof_metrics']['data'][periodo]['auc_min']
+                                        for periodo in list(auc_cases[model]['hof_metrics']['data'].keys())]
+    minmax_auc_test[model]['y_maxs'] = [auc_cases[model]['hof_metrics']['data'][periodo]['auc_max']
+                                        for periodo in list(auc_cases[model]['hof_metrics']['data'].keys())]
+
+# produce plot
+plot_5 = vs.g_timeseries_auc(p_data_auc=minmax_auc_test, p_theme=dt.theme_plot_5)
+
+# offline plot
+# plot_5.show()
+
+# online plot
+
+# -- ----------------------------------------------- Table 2: Model Parameter for AUC min and max values -- #
+# -- ----------------------------------------------------------------- --------------------------------- -- #
+# -- for every model, for every period, for AUC Min and AUC Max cases
+
+# stable data
+data_stables = {model: {'df_auc_max': {period: {} for period in t_folds},
+                        'df_auc_min': {period: {} for period in t_folds}} for model in ml_models}
+
+# periods
+period_max_auc = {model: {period: {} for period in t_folds} for model in ml_models}
+period_min_auc = {model: {period: {} for period in t_folds} for model in ml_models}
+
+# cycle for getting the parameters of every model
+for model in ml_models:
+    for period in list(t_folds.keys()):
+        period_max_auc[model][period] = auc_cases[model]['hof_metrics']['data'][period]['auc_max_params']
+        period_min_auc[model][period] = auc_cases[model]['hof_metrics']['data'][period]['auc_min_params']
+
+# Table 2: Model parameters
+table_2 = {'model_1': {'max': pd.DataFrame(period_max_auc['logistic-elasticnet']).T,
+                       'min': pd.DataFrame(period_min_auc['logistic-elasticnet']).T},
+           'model_2': {'max': pd.DataFrame(period_max_auc['ls-svm']).T,
+                       'min': pd.DataFrame(period_min_auc['ls-svm']).T},
+           'model_3': {'max': pd.DataFrame(period_max_auc['ann-mlp']).T,
+                       'min': pd.DataFrame(period_min_auc['ann-mlp']).T}}
+
+# evolution of parameters for every  model
+t_model_1 = table_2['model_1']['max']
+t_model_2 = table_2['model_2']['max']
+t_model_3 = table_2['model_3']['max']
