@@ -30,3 +30,12 @@ desempeño de todos los modelos predictivos.
 # -- Regresion Logistica con Regularizacion tipo Elastic Net (Clasificacion)
 
 # -- Maquinas de Soporte Vectorial (Clasificacion)
+
+# -- Analisis a POSTERIORI
+
+Opcion A) Tomar 1 trimestre, tomar 1 modelo, anotar las consideraciones y parametros para cada proceso,
+          correr los procesos de: Ing de variables, ajuste de modelo entrenamiento y prueba, optimizacion de
+          hiperparametros, medir tiempo transcurrido y memoria  utilizada.
+
+          Realizar este proceso con 7 periodos de tamaño diferente (1 trimestre,
+          2 trimestres, 4 trimestres, 8 trimestres, 16 trimestres, 32 trimestres, 40 trimestres)

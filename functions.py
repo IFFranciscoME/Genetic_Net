@@ -13,11 +13,14 @@
 import pandas as pd
 import numpy as np
 import random
+import data as dt
 
+from datetime import datetime
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LogisticRegression
 from sklearn.svm import SVC
 from sklearn.metrics import confusion_matrix, accuracy_score, roc_auc_score, roc_curve
+from sklearn.preprocessing import StandardScaler, RobustScaler, MaxAbsScaler
 from sklearn.neural_network import MLPClassifier
 from sklearn.utils.testing import ignore_warnings
 from sklearn.exceptions import ConvergenceWarning
@@ -26,7 +29,57 @@ from gplearn.genetic import SymbolicTransformer
 from deap import base, creator, tools, algorithms
 
 import warnings
-warnings.filterwarnings("ignore", category=RuntimeWarning)
+warnings.filterwarnings("ignore", category=ConvergenceWarning)
+
+
+# -------------------------------------------------------------------------- Data Scaling/Transformation -- #
+# -------------------------------------------------------------------------- --------------------------- -- #
+
+def data_scaler(p_data, p_trans):
+    """
+    Estandarizar (a cada dato se le resta la media y se divide entre la desviacion estandar) se aplica a
+    todas excepto la primera columna del dataframe que se use a la entrada
+
+    Parameters
+    ----------
+    p_trans: str
+        Standard: Para estandarizacion (restar media y dividir entre desviacion estandar)
+        Robust: Para estandarizacion robusta (restar mediana y dividir entre rango intercuartilico)
+
+    p_data: pd.DataFrame
+        Con datos numericos de entrada
+
+    Returns
+    -------
+    p_datos: pd.DataFrame
+        Con los datos originales estandarizados
+
+    """
+
+    if p_trans == 'Standard':
+
+        # estandarizacion de todas las variables independientes
+        lista = p_data[list(p_data.columns[1:])]
+
+        # armar objeto de salida
+        p_data[list(p_data.columns[1:])] = StandardScaler().fit_transform(lista)
+
+    elif p_trans == 'Robust':
+
+        # estandarizacion de todas las variables independientes
+        lista = p_data[list(p_data.columns[1:])]
+
+        # armar objeto de salida
+        p_data[list(p_data.columns[1:])] = RobustScaler().fit_transform(lista)
+
+    elif p_trans == 'Scale':
+
+        # estandarizacion de todas las variables independientes
+        lista = p_data[list(p_data.columns[1:])]
+
+        p_data[list(p_data.columns[1:])] = MaxAbsScaler().fit_transform(lista)
+
+    return p_data
 
 
 # --------------------------------------------------------------------------- Divide the data in T-Folds -- #
@@ -54,6 +107,9 @@ def t_folds(p_data, p_period):
     https://web.stanford.edu/~hastie/ElemStatLearn/
 
     """
+
+    # data scaling by standarization
+    p_data.iloc[:, 1:] = data_scaler(p_data=p_data.copy(), p_trans='Standard')
 
     # For monthly separation of the data
     if p_period == 'month':
@@ -226,9 +282,9 @@ def symbolic_features(p_x, p_y):
 
     # funcion de generacion de variables simbolicas
     model = SymbolicTransformer(function_set=["sub", "add", 'inv', 'mul', 'div', 'abs', 'log', 'sqrt'],
-                                population_size=6000, hall_of_fame=60, n_components=20,
-                                generations=50, tournament_size=20,  stopping_criteria=.60,
-                                const_range=None, init_method='half and half', init_depth=(4, 16),
+                                population_size=10000, hall_of_fame=40, n_components=30,
+                                generations=80, tournament_size=20,  stopping_criteria=.60,
+                                const_range=None, init_method='half and half', init_depth=(4, 12),
                                 metric='pearson', parsimony_coefficient=0.01,
                                 p_crossover=0.4, p_subtree_mutation=0.3, p_hoist_mutation=0.1,
                                 p_point_mutation=0.2, p_point_replace=.05,
@@ -398,7 +454,7 @@ def logistic_net(p_data, p_params):
     # Fit model
     en_model = LogisticRegression(l1_ratio=p_params['ratio'], C=p_params['c'], tol=1e-3,
                                   penalty='elasticnet', solver='saga', multi_class='ovr', n_jobs=-1,
-                                  max_iter=1000, fit_intercept=False)
+                                  max_iter=5000, fit_intercept=False)
 
     # model fit
     en_model.fit(x_train, y_train)
@@ -618,10 +674,10 @@ def ann_mlp(p_data, p_params):
                               learning_rate=p_params['learning_r'],
                               learning_rate_init=p_params['learning_r_init'],
 
-                              batch_size='auto', solver='sgd', power_t=0.5, max_iter=80000, shuffle=False,
-                              random_state=None, tol=1e-3, verbose=False, warm_start=False, momentum=0.5,
-                              nesterovs_momentum=True, early_stopping=True, validation_fraction=0.1,
-                              n_iter_no_change=10)
+                              batch_size='auto', solver='sgd', power_t=0.5, max_iter=10000, shuffle=False,
+                              random_state=None, tol=1e-7, verbose=False, warm_start=True, momentum=0.8,
+                              nesterovs_momentum=True, early_stopping=False, validation_fraction=0.2,
+                              n_iter_no_change=100)
 
     # model fit
     mlp_model.fit(x_train, y_train)
@@ -636,6 +692,11 @@ def ann_mlp(p_data, p_params):
     # Accuracy rate
     acc_train = accuracy_score(list(y_train), p_y_train_d)
     # False Positive Rate, True Positive Rate, Thresholds
+
+    x_probs = np.isnan(probs_train)
+    # replacing NaN values with 0
+    probs_train[x_probs] = 0
+
     fpr_train, tpr_train, thresholds_train = roc_curve(list(y_train), probs_train[:, 1], pos_label=1)
     # Area Under the Curve (ROC) for train data
     auc_train = roc_auc_score(list(y_train), probs_train[:, 1])
@@ -646,6 +707,10 @@ def ann_mlp(p_data, p_params):
     cm_test = confusion_matrix(p_y_result_test['y_test'], p_y_result_test['y_test_pred'])
     # Probabilities of class in test data
     probs_test = mlp_model.predict_proba(x_test)
+
+    y_probs = np.isnan(probs_test)
+    # replacing NaN values with 0
+    probs_test[y_probs] = 0
 
     # Accuracy rate
     acc_test = accuracy_score(list(y_test), p_y_test_d)
@@ -775,10 +840,10 @@ def genetic_algo_optimisation(p_data, p_model):
         toolbox_en.register("select", tools.selTournament, tournsize=10)
         toolbox_en.register("evaluate", evaluate_en)
 
-        population_size = 50
+        population_size = 60
         crossover_probability = 0.8
         mutation_probability = 0.1
-        number_of_generations = 4
+        number_of_generations = 1
 
         en_pop = toolbox_en.population(n=population_size)
         en_hof = tools.HallOfFame(10)
@@ -878,10 +943,10 @@ def genetic_algo_optimisation(p_data, p_model):
         toolbox_svm.register("select", tools.selTournament, tournsize=10)
         toolbox_svm.register("evaluate", evaluate_svm)
 
-        population_size = 50
+        population_size = 60
         crossover_probability = 0.8
         mutation_probability = 0.1
-        number_of_generations = 4
+        number_of_generations = 1
 
         svm_pop = toolbox_svm.population(n=population_size)
         svm_hof = tools.HallOfFame(10)
@@ -987,10 +1052,10 @@ def genetic_algo_optimisation(p_data, p_model):
         toolbox_mlp.register("select", tools.selTournament, tournsize=10)
         toolbox_mlp.register("evaluate", evaluate_mlp)
 
-        population_size = 50
+        population_size = 60
         crossover_probability = 0.8
         mutation_probability = 0.1
-        number_of_generations = 4
+        number_of_generations = 1
 
         mlp_pop = toolbox_mlp.population(n=population_size)
         mlp_hof = tools.HallOfFame(10)
@@ -1011,25 +1076,105 @@ def genetic_algo_optimisation(p_data, p_model):
     return 'error, sin modelo seleccionado'
 
 
-# ------------------------------------------------------------------------------ Evaluaciones en periodo -- #
+# -------------------------------------------------------------------------- Model Evaluations by period -- #
 # --------------------------------------------------------------------------------------------------------- #
 
 def model_evaluations(p_features, p_optim_data, p_model):
 
     for params in list(p_optim_data):
 
-        if p_model == 'model_1':
+        if p_model == 'logistic-elasticnet':
             parameters = {'ratio': params[0], 'c': params[1]}
 
             return logistic_net(p_data=p_features, p_params=parameters)
 
-        elif p_model == 'model_2':
+        elif p_model == 'ls-svm':
             parameters = {'c': params[0], 'kernel': params[1], 'gamma': params[2]}
 
             return ls_svm(p_data=p_features, p_params=parameters)
 
-        elif p_model == 'model_3':
+        elif p_model == 'ann-mlp':
             parameters = {'hidden_layers': params[0], 'activation': params[1], 'alpha': params[2],
                           'learning_r': params[3], 'learning_r_init': params[4]}
 
             return ann_mlp(p_data=p_features, p_params=parameters)
+
+
+# -------------------------------------------------------------------------- Model Evaluations by period -- #
+# --------------------------------------------------------------------------------------------------------- #
+
+def global_evaluations(p_data_folds, p_models, p_saving, p_file_name):
+    """
+    Global evaluations for specified data folds for specified models
+
+    Parameters
+    ----------
+    p_data_folds: dict
+
+    p_models: list
+
+    p_saving: bool
+
+    p_file_name: str
+
+    Returns
+    -------
+    memory_palace: dict
+
+    """
+
+    # main data structure for calculations
+    memory_palace = {j: {i: {'pop': [], 'logs': [], 'hof': [], 'e_hof': [], 'time': []}
+                         for i in t_folds} for j in list(dt.models.keys())}
+
+    # cycle to iterate all periods for all models
+    for period in p_data_folds:
+        for model in p_models:
+
+            # time measurement
+            init = datetime.now()
+
+            print('\n')
+            print('----------------------------')
+            print('modelo: ', model)
+            print('periodo: ', period)
+            print('----------------------------')
+            print('\n')
+            print('----------------------- Ingenieria de Variables por Periodo ------------------------')
+            print('----------------------- ----------------------------------- ------------------------')
+
+            # generacion de features
+            m_features = genetic_programed_features(p_data=p_data_folds[period], p_memory=7)
+
+            # Optimization
+            print('\n')
+            print('--------------------- Optimizacion de hiperparametros por Periodo ------------------')
+            print('--------------------- ------------------------------------------- ------------------')
+
+            # -- model optimization and evaluation for every element in the Hall of Fame for every period
+            # optimization process
+            hof_model = genetic_algo_optimisation(p_data=m_features, p_model=dt.models[model])
+            # evaluation process
+            for i in range(0, len(list(hof_model['hof']))):
+                hof_eval = model_evaluations(p_features=m_features, p_model=model,
+                                                p_optim_data=hof_model['hof'])
+                # save evaluation in memory_palace
+                memory_palace[model][period]['e_hof'].append(hof_eval)
+
+            # time measurement
+            end = datetime.now()
+            print("\nElapsed Time =", end - init)
+            memory_palace[model][period]['time'] = end - init
+
+    # -- --------------------------------------------------------------------- Save Data for offline use -- #
+
+    if p_saving:
+        # objects to be saved
+        pickle_rick = {'data': dt.ohlc_data, 'm_folds': p_data_folds, 'memory_palace': memory_palace}
+
+        # pickle format function
+        dt.data_save_load(p_data_objects=pickle_rick,
+                          p_data_file=p_file_name,
+                          p_data_action='save')
+
+    return memory_palace

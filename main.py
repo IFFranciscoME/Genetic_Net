@@ -13,7 +13,9 @@
 import visualizations as vs
 import data as dt
 import functions as fn
-
+import warnings
+import pickle
+warnings.filterwarnings("ignore")
 
 # ------------------------------------------------------------- PLOT 1: MXN/USD Historical Future Prices -- #
 # --------------------------------------------------------------- -------------------------------------- -- #
@@ -41,43 +43,36 @@ t_folds = fn.t_folds(p_data=dt.ohlc_data, p_period='quarter')
 # drop the last quarter because it is incomplete until december 31
 t_folds.pop('q_04_2020', None)
 
+# -- ----------------------------------------------------------------- PLOT 2: Time Series Block T-Folds -- #
+# -- ----------------------------------------------------------------- --------------------------------- -- #
+
+# construccion de fechas para lineas verticales de division de cada fold
+dates_folds = []
+for fold in t_folds:
+    dates_folds.append(t_folds[fold]['timestamp'].iloc[0])
+    dates_folds.append(t_folds[fold]['timestamp'].iloc[-1])
+
+# grafica OHLC
+plot_2 = vs.g_ohlc(p_ohlc=dt.ohlc_data,
+                   p_theme=dt.theme_plot_2, p_vlines=dates_folds)
+
+# mostrar grafica
+# plot_2.show()
+
+# generar grafica en chart studio
+# py.plot(plot_2)
+
 # ----------------------------------------------------------------- Features - Train/Optimization - Test -- #
 # ----------------------------------------------------------------- ------------------------------------ -- #
 
-# main data structure for calculations
-memory_palace = {j: {i: {'pop': [], 'logs': [], 'hof': [], 'e_hof': []}
-                     for i in t_folds} for j in list(dt.models.keys())}
+# -- --------------------------------------------------------------- Run Process (WARNING - Takes Hours) -- #
+# ml_models = list(dt.models.keys())
+# global_cases = fn.global_evaluations(p_data_folds=t_folds, p_models=ml_models,
+#                                      p_saving=True, p_file_name='Genetic_Net_Data_Folds.dat')
 
-for model in list(dt.models.keys()):
-    for period in t_folds:
-
-        print('\n')
-        print('----------------------------')
-        print('modelo: ', model)
-        print('periodo: ', period)
-        print('----------------------------')
-        print('\n')
-        print('----------------------- Ingenieria de Variables por Periodo ------------------------')
-        print('----------------------- ----------------------------------- ------------------------')
-
-        # generacion de features
-        m_features = fn.genetic_programed_features(p_data=t_folds[period], p_memory=7)
-
-        # resultados de optimizacion
-        print('\n')
-        print('--------------------- Optimizacion de hiperparametros por Periodo ------------------')
-        print('--------------------- ------------------------------------------- ------------------')
-
-        hof_model = fn.genetic_algo_optimisation(p_data=m_features, p_model=dt.models[model])
-        # -- evaluacion de modelo para cada modelo y cada periodo de todos los Hall of Fame
-        for i in range(0, len(list(hof_model['hof']))):
-            # evaluar modelo
-            hof_eval = fn.model_evaluations(p_features=m_features,
-                                            p_model=dt.models[model],
-                                            p_optim_data=hof_model['hof'])
-            # guardar evaluaciones de todos los individuos del Hall of Fame
-            memory_palace[model][period]['e_hof'].append(hof_eval)
-
+# -- ------------------------------------------------------------------------- Load Data for offline use -- #
+global_cases = dt.data_save_load(p_data_objects=None, p_data_action='load',
+                                 p_data_file='Genetic_Net_Quarters.dat')
 
 # -- -------------------------------------------------------------------- RESULTS: AUC Min and Max cases -- #
 # -- --------------------------------------------------------------------------- ----------------------- -- #
@@ -97,21 +92,21 @@ for model in list(dt.models.keys()):
         auc_cases[model]['hof_metrics']['data'][period] = {}
         auc_s = []
         for i in range(0, 10):
-            auc_s.append(memory_palace[model][period]['e_hof'][i]['metrics']['test']['auc'])
+            auc_s.append(global_cases[model][period]['e_hof'][i]['metrics']['test']['auc'])
 
             # -- caso 1
             # El individuo de todos los HOF de todos los periodos que produjo la minima AUC
-            if memory_palace[model][period]['e_hof'][i]['metrics']['test']['auc'] < auc_min:
-                auc_min = memory_palace[model][period]['e_hof'][i]['metrics']['test']['auc']
-                auc_cases[model]['auc_min']['data'] = memory_palace[model][period]['e_hof'][i]
-                auc_min_params = memory_palace[model][period]['e_hof'][i]['params']
+            if global_cases[model][period]['e_hof'][i]['metrics']['test']['auc'] < auc_min:
+                auc_min = global_cases[model][period]['e_hof'][i]['metrics']['test']['auc']
+                auc_cases[model]['auc_min']['data'] = global_cases[model][period]['e_hof'][i]
+                auc_min_params = global_cases[model][period]['e_hof'][i]['params']
 
             # -- caso 2
             # El individuo de todos los HOF de todos los periodos que produjo la maxima AUC
-            elif memory_palace[model][period]['e_hof'][i]['metrics']['test']['auc'] > auc_max:
-                auc_max = memory_palace[model][period]['e_hof'][i]['metrics']['test']['auc']
-                auc_cases[model]['auc_max']['data'] = memory_palace[model][period]['e_hof'][i]
-                auc_max_params = memory_palace[model][period]['e_hof'][i]['params']
+            elif global_cases[model][period]['e_hof'][i]['metrics']['test']['auc'] > auc_max:
+                auc_max = global_cases[model][period]['e_hof'][i]['metrics']['test']['auc']
+                auc_cases[model]['auc_max']['data'] = global_cases[model][period]['e_hof'][i]
+                auc_max_params = global_cases[model][period]['e_hof'][i]['params']
 
         # Guardar info por periodo
         auc_cases[model]['hof_metrics']['data'][period]['auc_s'] = auc_s

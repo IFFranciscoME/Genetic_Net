@@ -70,7 +70,7 @@ def g_ohlc(p_ohlc, p_theme, p_vlines):
     y0_ticks_vals = np.arange(min(p_ohlc['low']), max(p_ohlc['high']),
                               (max(p_ohlc['high']) - min(p_ohlc['low'])) / 10)
     y0_ticks_vals = np.append(y0_ticks_vals, max(p_ohlc['high']))
-    y0_ticks_vals = np.round(y0_ticks_vals, 4)
+    y0_ticks_vals = np.round(y0_ticks_vals, 5)
 
     # Instantiate a figure object
     fig_g_ohlc = go.Figure()
@@ -88,11 +88,12 @@ def g_ohlc(p_ohlc, p_theme, p_vlines):
     # Color and font type for text in axes
     fig_g_ohlc.update_layout(xaxis=dict(titlefont=dict(color=p_theme['p_colors']['color_1']),
                                         tickfont=dict(color=p_theme['p_colors']['color_1'],
-                                                      size=p_theme['p_fonts']['font_axis']), showgrid=True),
+                                                      size=p_theme['p_fonts']['font_axis']), showgrid=False),
                              yaxis=dict(zeroline=False, automargin=True,
                                         titlefont=dict(color=p_theme['p_colors']['color_1']),
                                         tickfont=dict(color=p_theme['p_colors']['color_1'],
-                                                      size=p_theme['p_fonts']['font_axis']), showgrid=True))
+                                                      size=p_theme['p_fonts']['font_axis']),
+                                        showgrid=True, gridcolor='lightgrey', gridwidth=.05))
 
     # If parameter vlines is used
     if p_vlines is not None:
@@ -120,5 +121,10 @@ def g_ohlc(p_ohlc, p_theme, p_vlines):
                              title=dict(x=0.5, text='Grafica 1:' + '<b> ' + p_labels['title'] + ' </b>'),
                              yaxis=dict(titlefont=dict(size=p_theme['p_fonts']['font_axis'] + 4)),
                              xaxis=dict(titlefont=dict(size=p_theme['p_fonts']['font_axis'] + 4)))
+
+    # Final plot dimensions
+    fig_g_ohlc.layout.autosize = True
+    fig_g_ohlc.layout.width = p_theme['p_dims']['width']
+    fig_g_ohlc.layout.height = p_theme['p_dims']['height']
 
     return fig_g_ohlc

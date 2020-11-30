@@ -5,6 +5,9 @@
 # -- Pycharm project info
 .idea/
 
+# -- backup files (google drive)
+files/pickle_rick
+
 # --------------------------------- #
 # --------------------------------- #
 
