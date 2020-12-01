@@ -8,7 +8,7 @@
 # -- repository: https://github.com/IFFranciscoME/Genetic_Net                                            -- #
 # -- --------------------------------------------------------------------------------------------------- -- #
 
-# Nota sobre estructura de proyectos de python
+# Nota sobre el uso de la estructura de proyectos de python
 
 # -- PROYECTO EN 2 PASOS ---------------------------------------------------------------------------------- #
 # -- ------------------- ---------------------------------------------------------------------------------- #
@@ -76,6 +76,8 @@ LOS DOS OBJETIVOS PARA ESTA MATERIA FUE RESOLVER EL PROBLEMA DE INGENIERIA DE VA
 DE HIPERPARAMETROS, PARA EL PRIMERO UTILICE PROGRAMACIÓN GENETICA Y PARA EL SEGUNDO ALGORITMOS GENÉTICOS.
 
 # -- Programacion Genetica (Ingenieria de Variables)
+# --------------------------------------------------------------------------------------------------------- #
+
 Principio: Una variable explicativa puede ser la transformacion lineal de otras variables explicativas, con la
 se hacen transformaciones estadisticas a la serie de los precios y estas se utilizan como entrada
 de los "programas" construidos con variables simbolicas. Estos programas son en realidad ecuaciones que
@@ -89,26 +91,83 @@ Tenia 1 variables tipo autoregressivas y 1 variables del producto hadamard (mult
 utilizaron como variables simbólicas en el proceso de programación genética, armando así las ecuaciones
 con variables simbólicas.
 
-MOSTRAR FUNCION
 
-MOSTRAR SECCION -- Ingenieria de Variables por Periodo --
+p_crossover = Requiere que existan 2 torneos
+              toma el ganador del 1ero y selecciona un sub-arbol del programa para reemplazarse
+              se hace otro torneo y toma un donador (el mejor de ese nuevo torneo) se selecciona un 
+              sub-arbol aleatorio y se lo pone al primero.
 
-# -- Red Neuronal Perceptron Multicapa con Retropropagacion (Clasificacion)
+
+p_subtree_mutation = toma el ganador de un torneo, selecciona un sub-arbol aleatorio para ser reemplazado, 
+               un sub-arbol donante es generado aleatorio con las funciones primitivas
+
+p_hoist_mutation = toma el ganador de un torneo, selecciona en aleatorio un subarbol, y un subarbol 
+                   del subarbol se toma otra vez en aleatorio y de este ultimo un aleatorio se toma 
+                   para "pegarse arriba" de lo que quedo. 
+
+p_point_mutation = toma el ganador de un torneo, selecciona nodo aleatorio y lo reemplaza
+
+
+n_components = el numero de mejores programas a regresar del Hall of Fame
+
+hall_of_fame = el numero de los "mejores" programas con los cuales compararse cuando se encuentren los
+               individuos menos correlacionados entre si de los n_components.
+
+
+parsimony_coefficient = para penalizar programas muy grandes, los penaliza al ajustar su fitness con 
+                        el factor elegido, para asi que sean menos favorables para la seleccion. 
+
+
+RUTAS HEURISTICAS V0.1
+
+"ramped half and half"
+
+- Profundidad inicial, con el termino init_depth, para la poblacion inicial (arbol inicial) que sea en un
+  rango muy variado y amplio para poder tener arboles amplios de donde se elija una gran variedad de
+  sub-arboles y de nodos.
+- Metodo de inicializacion, con el termino init_method, con un valor de "Half and Half", que es
+  tener la posibilidad de generar arboles con variaciones entre sus parametros de profundidad y amplitud,
+  expresadas en "depth" y "grow"
+- Con ambas cosas anteriores se esta inicializando con el metodo "ramped half and half" como se menciona
+  en el documento de apoyo (paper).
+
+"Objetivo por correlacion"
+
+- la metrica de ajuste, con el parametro "metric", se elige "pearson". Para poder generar varias
+  variables explicativas a la vez, se maximiza la correlacion de estas respecto a la variable a explicar, y
+  se hace el calculo con el valor absoluto para que tambien se incluyan variables explicativas con
+  correlacion alta negativa.
+  Otra sugerencia es que se utilice pearson cuando las variables seran utilizadas para un modelo lineal,
+  y spearman para cuando es un modelo basado en arboles. Para el caso de un modelo lineal, hace sentido
+  puesto que las variables explicativas son relacionadas mediante una combinacion lineal de las mismas
+  para realizar la prediccion.
+  Los resultados de las variables generadas con menor correlacion entre ellas se reportan en el hall_of_fame,
+  y con el n_components se seleccionan las top N variables de acuerdo a su correlacion con la variable
+  explicativa.
+
+
+# -- Red Neuronal Perceptron Multicapa con Retropropagacion (Clasificacion) ------------------------------- #
+# --------------------------------------------------------------------------------------------------------- #
 Funcion de activacion: Sigmoidal y Relu
 aprendizaje: constant (learning_rate_init)y adaptive (constant si no mejora divide entre 5)
 capas ocultas: varias y de 1 a 2 capas
 neuronas por capa: varias cifras
 
-# -- Regresion Logistica con Regularizacion tipo Elastic Net (Clasificacion)
+# -- Regresion Logistica con Regularizacion tipo Elastic Net (Clasificacion) ------------------------------ #
+# --------------------------------------------------------------------------------------------------------- #
 ratio: ratio de regularizacion Ridge y Lasso (l1_ratio=0 == 100% Ridge | l1_ratio=1 == 100% Lasso)
 c: el inverso de fuerza de regularizacion (valores pequeños es regularizacion fuerte)
 
-# -- Maquinas de Soporte Vectorial (Clasificacion)
+# -- Maquinas de Soporte Vectorial (Clasificacion) -------------------------------------------------------- #
+# --------------------------------------------------------------------------------------------------------- #
 kernel: lineal y radial
-C: factor de regularizacion
+C: el inverso de fuerza de regularizacion (valores pequeños es regularizacion fuerte)
 gamma: coeficiente dentro del kernel radial.
+gamma == 'scale' -> 1 / (n_features * X.var())
+gamma == 'auto'  -> 1 / n_features
 
-# -- Algoritmos Geneticos (Optimizacion de Hiperparametros)
+# -- Algoritmos Geneticos (Optimizacion de Hiperparametros) ----------------------------------------------- #
+# --------------------------------------------------------------------------------------------------------- #
 Individuo = un caso evaluado (un resultado de la funcion fitness)
 Mutacion de individuo = Eleccion aleatoria de cromosoma y eleccion aleatora de opcion para gen
 Cruzamiento = "punto fijo" - divide a 2 individuos aleatorios en un punto aleatorio simetrico y recombina

@@ -89,15 +89,15 @@ for file_f in files_f:
         price_data['MP_D_' + year_f] = data_f
 
 # whole data sets integrated
-ohlc_data = pd.concat([price_data[list(price_data.keys())[0]], price_data[list(price_data.keys())[1]],
-                       price_data[list(price_data.keys())[2]], price_data[list(price_data.keys())[3]],
-                       price_data[list(price_data.keys())[4]], price_data[list(price_data.keys())[5]],
-                       price_data[list(price_data.keys())[6]], price_data[list(price_data.keys())[7]],
-                       price_data[list(price_data.keys())[8]], price_data[list(price_data.keys())[9]],
-                       price_data[list(price_data.keys())[10]]])
+# ohlc_data = pd.concat([price_data[list(price_data.keys())[0]], price_data[list(price_data.keys())[1]],
+#                        price_data[list(price_data.keys())[2]], price_data[list(price_data.keys())[3]],
+#                        price_data[list(price_data.keys())[4]], price_data[list(price_data.keys())[5]],
+#                        price_data[list(price_data.keys())[6]], price_data[list(price_data.keys())[7]],
+#                        price_data[list(price_data.keys())[8]], price_data[list(price_data.keys())[9]],
+#                        price_data[list(price_data.keys())[10]]])
 
 # 2013 dataset
-# ohlc_data = pd.concat([price_data[list(price_data.keys())[2]]])
+ohlc_data = pd.concat([price_data[list(price_data.keys())[10]]])
 
 # reset index
 ohlc_data.reset_index(inplace=True, drop=True)
@@ -117,10 +117,12 @@ models = {
                    'learning_r': ['constant', 'constant', 'constant', 'constant', 'constant',
                                   'adaptive', 'adaptive', 'adaptive', 'adaptive', 'adaptive'],
                    'learning_r_init': [0.2, 0.1, 0.02, 0.01, 0.001, 0.2, 0.1, 0.02, 0.01, 0.001]}},
+
     'logistic-elasticnet': {
         'label': 'logistic-elasticnet',
         'params': {'ratio': [0.05, 0.10, 0.20, 0.30, 0.50, 0.60, 0.70, 0.80, 0.90, 1.00],
                    'c': [1.5, 1.1, 1, 0.8, 0.5, 1.5, 1.1, 1, 0.8, 0.5]}},
+
     'ls-svm': {
         'label': 'ls-svm',
         'params': {'c': [1.5, 1.1, 1, 0.8, 0.5, 1.5, 1.1, 1, 0.8, 0.5],
@@ -200,7 +202,7 @@ def data_save_load(p_data_objects, p_data_action, p_data_file):
             pickle.dump(p_data_objects, f)
 
         # Return message
-        return 'Data saved in pickle.dat file'
+        return 'Data saved in' + p_data_file + 'file'
 
     # if loading is required
     elif p_data_action == 'load':

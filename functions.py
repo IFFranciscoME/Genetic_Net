@@ -30,6 +30,7 @@ from deap import base, creator, tools, algorithms
 
 import warnings
 warnings.filterwarnings("ignore", category=ConvergenceWarning)
+warnings.filterwarnings("ignore", category=FutureWarning)
 
 
 # -------------------------------------------------------------------------- Data Scaling/Transformation -- #
@@ -375,6 +376,9 @@ def genetic_programed_features(p_data, p_memory):
     # -------------------------------------------------------- Feature Engineering for Symbolic Features -- #
     # -------------------------------------------------------- ----------------------------------------- -- #
 
+    # Ejemplo de ecuacion:
+    # ma_hl_5 * (lag_ol_5 + ma_ho_6) * (lag_ol_6 + 0.074 + ma_hl_3 * (lag_ol_4 - ma_ol_3) / lag_ho_4)
+
     # Symbolic features generation
     fun_sym = symbolic_features(p_x=data_had, p_y=data_y)
 
@@ -383,7 +387,7 @@ def genetic_programed_features(p_data, p_memory):
     data_sym.columns = ['sym_' + str(i) for i in range(0, len(fun_sym['data'].iloc[0, :]))]
 
     # equations for the symbolic features
-    # equations = [i.__str__() for i in list(fun_sym['model'])]
+    equations = [i.__str__() for i in list(fun_sym['model'])]
 
     # concatenated data of the 3 types of features
     data_model = pd.concat([data_arf.copy(), data_had.copy(), data_sym.copy()], axis=1)
@@ -397,6 +401,7 @@ def genetic_programed_features(p_data, p_memory):
     model_data['train_y'] = ytrain
     model_data['test_x'] = xtest
     model_data['test_y'] = ytest
+    model_data['features_eq'] = equations
 
     return model_data
 
@@ -879,7 +884,7 @@ def genetic_algo_optimisation(p_data, p_model):
                                              ngen=number_of_generations,
                                              halloffame=en_hof, verbose=True)
 
-        return {'population': en_pop, 'logs': en_log, 'hof': en_hof}
+        return {'pop': en_pop, 'logs': en_log, 'hof': en_hof}
 
     # -- --------------------------------------------------------- Least Squares Support Vector Machines -- #
     # ----------------------------------------------------------------------------------------------------- #
@@ -982,7 +987,7 @@ def genetic_algo_optimisation(p_data, p_model):
                                                ngen=number_of_generations,
                                                halloffame=svm_hof, verbose=True)
 
-        return {'population': svm_pop, 'logs': svm_log, 'hof': svm_hof}
+        return {'pop': svm_pop, 'logs': svm_log, 'hof': svm_hof}
 
     # -- ----------------------------------------------- Artificial Neural Network MultiLayer Perceptron -- #
     # ----------------------------------------------------------------------------------------------------- #
@@ -1091,7 +1096,7 @@ def genetic_algo_optimisation(p_data, p_model):
                                                ngen=number_of_generations,
                                                halloffame=mlp_hof, verbose=True)
 
-        return {'population': mlp_pop, 'logs': mlp_log, 'hof': mlp_hof}
+        return {'pop': mlp_pop, 'logs': mlp_log, 'hof': mlp_hof}
 
     return 'error, sin modelo seleccionado'
 
@@ -1144,7 +1149,7 @@ def folds_evaluations(p_data_folds, p_models, p_saving, p_file_name):
     """
 
     # main data structure for calculations
-    memory_palace = {j: {i: {'pop': [], 'logs': [], 'hof': [], 'e_hof': [], 'time': []}
+    memory_palace = {j: {i: {'e_hof': [], 'time': [], 'features': {}}
                          for i in p_data_folds} for j in list(dt.models.keys())}
 
     # cycle to iterate all periods for all models
@@ -1163,8 +1168,11 @@ def folds_evaluations(p_data_folds, p_models, p_saving, p_file_name):
             print('----------------------- Ingenieria de Variables por Periodo ------------------------')
             print('----------------------- ----------------------------------- ------------------------')
 
-            # generacion de features
+            # Feature engineering (Autoregressive, Hadamard, Symbolic)
             m_features = genetic_programed_features(p_data=p_data_folds[period], p_memory=7)
+
+            # Save features used in the evaluation in memory_palace
+            memory_palace[model][period]['features'] = m_features
 
             # Optimization
             print('\n')
@@ -1174,6 +1182,13 @@ def folds_evaluations(p_data_folds, p_models, p_saving, p_file_name):
             # -- model optimization and evaluation for every element in the Hall of Fame for every period
             # optimization process
             hof_model = genetic_algo_optimisation(p_data=m_features, p_model=dt.models[model])
+
+            # Save logs information of the optimisation process
+            # memory_palace[model][period]['logs'] = hof_model['logs']
+
+            # Save Hall of Fame information of the optimisation process
+            # memory_palace[model][period]['hof'] = hof_model['hof']
+
             # evaluation process
             for i in range(0, len(list(hof_model['hof']))):
                 hof_eval = model_evaluations(p_features=m_features, p_model=model,
@@ -1190,7 +1205,8 @@ def folds_evaluations(p_data_folds, p_models, p_saving, p_file_name):
 
     if p_saving:
         # objects to be saved
-        pickle_rick = {'data': dt.ohlc_data, 't_folds': p_data_folds, 'memory_palace': memory_palace}
+        pickle_rick = {'data': dt.ohlc_data, 'models': p_models,
+                       't_folds': p_data_folds, 'memory_palace': memory_palace}
 
         # pickle format function
         dt.data_save_load(p_data_objects=pickle_rick,

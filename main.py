@@ -39,9 +39,9 @@ table_1 = dt.ohlc_data.describe()
 # --------------------------------------------------------- -------------------------------------------- -- #
 
 # # in quarters obtain 4 folds for each year
-t_folds = fn.t_folds(p_data=dt.ohlc_data, p_period='quarter')
+t_folds = fn.t_folds(p_data=dt.ohlc_data, p_period='semester')
 # drop the last quarter because it is incomplete until december 31
-t_folds.pop('q_04_2020', None)
+# t_folds.pop('q_04_2020', None)
 
 # in quarters obtain 4 folds for each year
 # t_folds = fn.t_folds(p_data=dt.ohlc_data, p_period='semester')
@@ -72,17 +72,18 @@ plot_2 = vs.g_ohlc(p_ohlc=dt.ohlc_data,
 ml_models = list(dt.models.keys())
 
 # -- --------------------------------------------------------------- Run Process (WARNING - Takes Hours) -- #
-# global_evaluations = fn.folds_evaluations(p_data_folds=t_folds, p_models=ml_models,
-#                                           p_saving=True, p_file_name='Genetic_Net_Semester.dat')
+global_evaluations = fn.folds_evaluations(p_data_folds=t_folds, p_models=ml_models,
+                                          p_saving=False, p_file_name='Genetic_Net_Semester.dat')
 
-# global_data = global_evaluations
+# dt.data_save_load(p_data_objects=global_evaluations,
+#                   p_data_action='save', p_data_file='Genetico_Net_Semester.dat')
+
 
 # -- ------------------------------------------------------------------------- Load Data for offline use -- #
-global_data = dt.data_save_load(p_data_objects=None, p_data_action='load',
-                                p_data_file='files/pickle_rick/Genetic_Net_Quarter.dat')
+# global_data = dt.data_save_load(p_data_objects=None, p_data_action='load',
+#                                 p_data_file='files/pickle_rick/Genetic_Net_Quarter.dat')
 
-global_cases = global_data['memory_palace']
-global_features = global_data['global_features']
+global_cases = global_evaluations['memory_palace']
 
 # -- ----------------------------------------------------------------------------- AUC Min and Max cases -- #
 # -- ----------------------------------------------------------------------------- --------------------- -- #
@@ -93,6 +94,9 @@ auc_cases = fn.models_auc(p_models=ml_models, p_global_cases=global_cases, p_dat
 # -- -------------------------------------------------------------------------- Model Global Performance -- #
 # -- ----------------------------------------------------------------------------- --------------------- -- #
 
+# extract the features of both the min AUC and max AUC cases
+global_features = []
+
 # model performance for all models, with the min and max AUC parameters
 global_evaluations = fn.model_evaluation(p_features=global_features, p_models=ml_models, p_cases=auc_cases)
 
@@ -102,7 +106,7 @@ global_evaluations = fn.model_evaluation(p_features=global_features, p_models=ml
 obs_class = list(global_features['train_y']) + list(global_features['test_y'])
 obs_class = [-1 if x == 0 else 1 for x in obs_class]
 
-model_data = global_evaluations['logistic-elasticnet']['auc_max']['results']['data']
+model_data = global_evaluations['ann-mlp']['auc_max']['results']['data']
 pred_class = list(model_data['train']['y_train_pred']) + list(model_data['test']['y_test_pred'])
 pred_class = [-1 if x == 0 else 1 for x in pred_class]
 x_series = list(dt.ohlc_data['timestamp'])
@@ -177,3 +181,4 @@ table_2 = {'model_1': {'max': pd.DataFrame(period_max_auc['logistic-elasticnet']
 t_model_1 = table_2['model_1']['max']
 t_model_2 = table_2['model_2']['max']
 t_model_3 = table_2['model_3']['max']
+t_model_3['hidden_layers'] = [str(i) for i in list(t_model_3['hidden_layers'])]

@@ -195,13 +195,13 @@ def g_relative_bars(p_x, p_y0, p_y1, p_theme):
                                                              size=p_theme['p_fonts']['font_axis'])))
 
     # Update layout for the y axis
-    fig_relative_bars.update_yaxes(showgrid=False, range=[-1.05, 1.05])
+    fig_relative_bars.update_yaxes(showgrid=False, range=[-1, 1])
 
     # Legend format
     fig_relative_bars.update_layout(paper_bgcolor='white', plot_bgcolor='white', barmode='overlay',
-                                    legend=go.layout.Legend(x=.41, y=-.10, orientation='h',
-                                                            font=dict(size=14, color='grey')),
-                                    margin=go.layout.Margin(l=20, r=20, b=20, t=20, pad=20))
+                                    legend=go.layout.Legend(x=.41, y=-.12, orientation='h',
+                                                            font=dict(size=18, color='grey')),
+                                    margin=go.layout.Margin(l=0, r=0, b=0, t=50, pad=40))
 
     # Update layout for the background
     fig_relative_bars.update_layout(title_font_size=p_theme['p_fonts']['font_title'],
@@ -249,10 +249,10 @@ def g_roc_auc(p_cases, p_models, p_type, p_theme):
                                               mode='lines+markers', line=dict(width=2, color='blue')))
 
     # Formato para titulo
-    fig_rocs.update_layout(legend=go.layout.Legend(x=.090, y=-0.11, orientation='h',
+    fig_rocs.update_layout(legend=go.layout.Legend(x=.15, y=-0.11, orientation='h',
                                                      bordercolor='dark grey',
-                                                     borderwidth=1,
-                                                     font=dict(size=12)))
+                                                     borderwidth=0,
+                                                     font=dict(size=18)))
 
     # Formato de tamanos
     fig_rocs.layout.autosize = True
@@ -349,7 +349,7 @@ def g_timeseries_auc(p_data_auc, p_theme):
     #                          xaxis=dict(titlefont=dict(size=p_theme['p_theme']['font_axis']+4)))
 
     # Formato para titulo
-    fig_ts_auc.update_layout(legend=go.layout.Legend(x=.1, y=-0.21, orientation='h',
+    fig_ts_auc.update_layout(legend=go.layout.Legend(x=.11, y=-0.21, orientation='h',
                                                      bordercolor='dark grey',
                                                      borderwidth=1,
                                                      font=dict(size=16)))
