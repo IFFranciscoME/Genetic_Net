@@ -38,10 +38,13 @@ table_1 = dt.ohlc_data.describe()
 # --------------------------------------------------------- Timeseries T-Folds Blocks Without Filtration -- #
 # --------------------------------------------------------- -------------------------------------------- -- #
 
-# in quarters obtain 4 folds for each year
+# # in quarters obtain 4 folds for each year
 t_folds = fn.t_folds(p_data=dt.ohlc_data, p_period='quarter')
 # drop the last quarter because it is incomplete until december 31
 t_folds.pop('q_04_2020', None)
+
+# in quarters obtain 4 folds for each year
+# t_folds = fn.t_folds(p_data=dt.ohlc_data, p_period='semester')
 
 # -- ----------------------------------------------------------------- PLOT 2: Time Series Block T-Folds -- #
 # -- ----------------------------------------------------------------- --------------------------------- -- #
@@ -70,14 +73,16 @@ ml_models = list(dt.models.keys())
 
 # -- --------------------------------------------------------------- Run Process (WARNING - Takes Hours) -- #
 # global_evaluations = fn.folds_evaluations(p_data_folds=t_folds, p_models=ml_models,
-#                                           p_saving=True, p_file_name='Genetic_Net_Data_Folds.dat')
+#                                           p_saving=True, p_file_name='Genetic_Net_Semester.dat')
+
+# global_data = global_evaluations
 
 # -- ------------------------------------------------------------------------- Load Data for offline use -- #
-global_evaluations = dt.data_save_load(p_data_objects=None, p_data_action='load',
-                                       p_data_file='files/pickle_rick/Genetic_Net_Quarters.dat')
+global_data = dt.data_save_load(p_data_objects=None, p_data_action='load',
+                                p_data_file='files/pickle_rick/Genetic_Net_Quarter.dat')
 
-global_cases = global_evaluations['memory_palace']
-global_features = global_evaluations['global_features']
+global_cases = global_data['memory_palace']
+global_features = global_data['global_features']
 
 # -- ----------------------------------------------------------------------------- AUC Min and Max cases -- #
 # -- ----------------------------------------------------------------------------- --------------------- -- #
@@ -89,7 +94,7 @@ auc_cases = fn.models_auc(p_models=ml_models, p_global_cases=global_cases, p_dat
 # -- ----------------------------------------------------------------------------- --------------------- -- #
 
 # model performance for all models, with the min and max AUC parameters
-global_auc_cases = fn.model_evaluation(p_features=global_features, p_models=ml_models, p_cases=auc_cases)
+global_evaluations = fn.model_evaluation(p_features=global_features, p_models=ml_models, p_cases=auc_cases)
 
 # -- ------------------------------------------------------------- PLOT 3: Classification Global Results -- #
 # -- ----------------------------------------------------------------------------- --------------------- -- #
@@ -97,7 +102,7 @@ global_auc_cases = fn.model_evaluation(p_features=global_features, p_models=ml_m
 obs_class = list(global_features['train_y']) + list(global_features['test_y'])
 obs_class = [-1 if x == 0 else 1 for x in obs_class]
 
-model_data = global_auc_cases['logistic-elasticnet']['auc_max']['results']['data']
+model_data = global_evaluations['logistic-elasticnet']['auc_max']['results']['data']
 pred_class = list(model_data['train']['y_train_pred']) + list(model_data['test']['y_test_pred'])
 pred_class = [-1 if x == 0 else 1 for x in pred_class]
 x_series = list(dt.ohlc_data['timestamp'])
@@ -114,10 +119,10 @@ plot_3 = vs.g_relative_bars(p_x=x_series, p_y0=obs_class, p_y1=pred_class, p_the
 # -- ----------------------------------------------------------------------------- --------------------- -- #
 
 # Timeseries of the AUCs
-plot_4 = vs.g_roc_auc(p_cases=auc_cases, p_type='test', p_models=ml_models, p_theme=dt.theme_plot_4)
+plot_4_folds = vs.g_roc_auc(p_cases=auc_cases, p_type='test', p_models=ml_models, p_theme=dt.theme_plot_4)
 
 # offline plot
-# plot_4.show()
+# plot_4_folds.show()
 
 # online plot
 

@@ -141,6 +141,26 @@ def t_folds(p_data, p_period):
                            for i in quarters})
         return q_data
 
+    # For quarterly separation of the data
+    elif p_period == 'semester':
+        # List of years in the dataset
+        years = set(time.year for time in list(p_data['timestamp']))
+        s_data = {}
+        # New key for every quarter_year
+        for y in sorted(list(years)):
+            # y = sorted(list(years))[0]
+            s_data.update({'s_' + str('0') + str(1) + '_' + str(y):
+                               p_data[(pd.to_datetime(p_data['timestamp']).dt.year == y) &
+                                      ((pd.to_datetime(p_data['timestamp']).dt.quarter == 1) |
+                                      (pd.to_datetime(p_data['timestamp']).dt.quarter == 2))]})
+
+            s_data.update({'s_' + str('0') + str(2) + '_' + str(y):
+                               p_data[(pd.to_datetime(p_data['timestamp']).dt.year == y) &
+                                      ((pd.to_datetime(p_data['timestamp']).dt.quarter == 3) |
+                                       (pd.to_datetime(p_data['timestamp']).dt.quarter == 4))]})
+
+        return s_data
+
     # In the case a different label has been receieved
     return 'Error: verify parameters'
 
@@ -1194,6 +1214,9 @@ def models_auc(p_models, p_global_cases, p_data_folds):
 
     p_global_cases: dict
         With all the info for the global cases
+
+    p_data_folds: dict
+        with all the historical data info in folds
 
     Returns
     -------

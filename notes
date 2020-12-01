@@ -8,36 +8,116 @@
 # -- repository: https://github.com/IFFranciscoME/Genetic_Net                                            -- #
 # -- --------------------------------------------------------------------------------------------------- -- #
 
-# -- Datos
+# Nota sobre estructura de proyectos de python
 
-Son precios historicos de contratos "Futuros", un tipo especial de contrato financiero denominado
-"Derivado Financiero". Se obtuvo de la fuente oficial, la bolsa de derivados del Chicago Mercantile Exchange.
-Se obtuvo por periodos de minutos y se hizo el codigo para agruparlo en periodos de dias.
+# -- PROYECTO EN 2 PASOS ---------------------------------------------------------------------------------- #
+# -- ------------------- ---------------------------------------------------------------------------------- #
+
+ENTRADA:
+    Utilizar los precios historicos del tipo de cambio de los ultimos 10 años
+SALIDA:
+    Pronosticar si el precio del dia de mañana cerrará a la baja o a la alza (y probar esto históricamente)
+
+# --- PROYECTO EN 3 PASOS --------------------------------------------------------------------------------- #
+# -- --------------------- -------------------------------------------------------------------------------- #
+
+ENTRADA:
+    4 Precios historicos por dia (Apertura, Maximo, Minimo, Cierre)
+PROCESAMIENTO:
+    Proponer 3 modelos de machine learning para hacer el pronostico
+SALIDA:
+    Guardar resultados por period y en una prueba para todos los periodos, para todos los modelos, para
+    todos los periodos trimestrales y semestrales de los ultimos 10 años
+
+# --- PROYECTO EN 5 PASOS --------------------------------------------------------------------------------- #
+# -- -------------------- --------------------------------------------------------------------------------- #
+
+ENTRADA:
+    Utilizar los 4 precios historicos (Apertura, Maximo, Minimo, Cierre) y Volumen de futuros del tipo de
+    cambio de los ultimos 10 años.
+PROCESO 1:
+    Ing de variables autoregressivas y producto hadamard como datos de entrada para el proceso de
+    generación de variables simbolicas utilizando programacion genetica.
+PROCESO 2:
+    Proponer 3 modelos, en incrementos de complejidad, 1 que usa una combinacion lineal de variables de
+    entrada y la transformacion final es una sigmoidal (logistica), 1 que es una combinacion lineal de
+    variables de entrada y hace una transformacion en el hiperespacio (svm) y otro que es una combinacion
+    no lineal de transformaciones no lineales en un hiperespacio con funcion de activacion particular (mlp)
+     y lista de parámetros a optimizar el error de generalización.
+    pronóstico
+PROCESO 3:
+    Division de datos en T periodos y conducir proceso de ing de variables, optimización/entrenamiento y
+    validación por cada T periodo, esto como propuesta de cross validation para series de tiempo.
+SALIDA:
+    Visualización de resultados de cada periodo y para periodo global, con medidas de desempeño,
+    visualizaciones, y visualizacion de estabilidad de hiperparametros.
+
+# -- Datos
+Historicos de contratos "Futuros", de fuente oficial CME Group.
+Son 4 precios por minuto (Open, High, Low, Close)
+Se hizo el codigo para agruparlo en periodos de dias.
+
+MOSTRAR ohlc_data
 
 # -- Bloques de series de tiempo Secuenciales Sin Filtraciones
+Con 10 años de informacion
+Se dividen los precios por periodos trimestrales y semestreales (calendario)
+para cada periodo se utiliza 70% de los datos para entrenamiento y 30% para validacion.
 
-Se dividen los precios por periodos trimestrales (calendario) y para cada periodo se utiliza
-70% de los datos para entrenamiento y 30% para validacion.
+MOSTRAR plot_2
 
-* Acorde a "The Elements of Statistical Learning"
+* Crossvalidation especial para series de tiempo, adaptado de "The Elements of Statistical Learning"
 Para cada periodo se hace el proceso de ingenieria de variables, ajuste de modelos, optimizacion de
 hiperparametros y calculo de metricas de desempeño de todos los modelos predictivos.
 
-# -- Programacion Genetica (Ingenieria de Variables)
+MOSTRAR t_folds
 
-# -- Algoritmos Geneticos (Optimizacion de Hiperparametros)
+LOS DOS OBJETIVOS PARA ESTA MATERIA FUE RESOLVER EL PROBLEMA DE INGENIERIA DE VARIABLES Y EL DE OPTIMIZACION
+DE HIPERPARAMETROS, PARA EL PRIMERO UTILICE PROGRAMACIÓN GENETICA Y PARA EL SEGUNDO ALGORITMOS GENÉTICOS.
+
+# -- Programacion Genetica (Ingenieria de Variables)
+Principio: Una variable explicativa puede ser la transformacion lineal de otras variables explicativas, con la
+se hacen transformaciones estadisticas a la serie de los precios y estas se utilizan como entrada
+de los "programas" construidos con variables simbolicas. Estos programas son en realidad ecuaciones que
+utilizan las operaciones primitivas que se especifican. y la salida de cada programa/ecuacion calcula, para
+cada punto del tiempo, un valor (variable explicativa) y ese valor se utiliza para calcular
+la correlación de perason de toda la serie de tiempo con la variable objetivo, cuando al menos un individuo
+de la generacion logra ese coeficiente de correlacion de pearson igual o mayor al objetivo, se toman los
+19 siguientes individuos con mayor correlación hacia la variable objetivo y menor correlacion entre ellos.
+
+Tenia 1 variables tipo autoregressivas y 1 variables del producto hadamard (multiplicacion 1x1) y esas se
+utilizaron como variables simbólicas en el proceso de programación genética, armando así las ecuaciones
+con variables simbólicas.
+
+MOSTRAR FUNCION
+
+MOSTRAR SECCION -- Ingenieria de Variables por Periodo --
 
 # -- Red Neuronal Perceptron Multicapa con Retropropagacion (Clasificacion)
+Funcion de activacion: Sigmoidal y Relu
+aprendizaje: constant (learning_rate_init)y adaptive (constant si no mejora divide entre 5)
+capas ocultas: varias y de 1 a 2 capas
+neuronas por capa: varias cifras
 
 # -- Regresion Logistica con Regularizacion tipo Elastic Net (Clasificacion)
+ratio: ratio de regularizacion Ridge y Lasso (l1_ratio=0 == 100% Ridge | l1_ratio=1 == 100% Lasso)
+c: el inverso de fuerza de regularizacion (valores pequeños es regularizacion fuerte)
 
 # -- Maquinas de Soporte Vectorial (Clasificacion)
+kernel: lineal y radial
+C: factor de regularizacion
+gamma: coeficiente dentro del kernel radial.
+
+# -- Algoritmos Geneticos (Optimizacion de Hiperparametros)
+Individuo = un caso evaluado (un resultado de la funcion fitness)
+Mutacion de individuo = Eleccion aleatoria de cromosoma y eleccion aleatora de opcion para gen
+Cruzamiento = "punto fijo" - divide a 2 individuos aleatorios en un punto aleatorio simetrico y recombina
+los genes de cada division entre ambos individuos
+Seleccion = Se hace k veces un torneo entre 10 individuos aleatoriamente elegidos de la poblacion y se
+selecciona los HoF mejores de acuerdo al fitness
+Evaluacion = funcion propia (medida de precision que considera la generalidad 50% 50%)
 
 # -- Analisis a POSTERIORI
 
-Opcion A) Tomar 1 trimestre, tomar 1 modelo, anotar las consideraciones y parametros para cada proceso,
-          correr los procesos de: Ing de variables, ajuste de modelo entrenamiento y prueba, optimizacion de
-          hiperparametros, medir tiempo transcurrido y memoria  utilizada.
-
-          Realizar este proceso con 7 periodos de tamaño diferente (1 trimestre,
-          2 trimestres, 4 trimestres, 8 trimestres, 16 trimestres, 32 trimestres, 40 trimestres)
+Opcion A) Realizar este proceso con 5 tamaños de periodo diferentes (1 trimestre, 1 semestre, 1 año,
+          2 años, 5 años)
