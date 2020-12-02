@@ -89,15 +89,15 @@ for file_f in files_f:
         price_data['MP_D_' + year_f] = data_f
 
 # whole data sets integrated
-# ohlc_data = pd.concat([price_data[list(price_data.keys())[0]], price_data[list(price_data.keys())[1]],
-#                        price_data[list(price_data.keys())[2]], price_data[list(price_data.keys())[3]],
-#                        price_data[list(price_data.keys())[4]], price_data[list(price_data.keys())[5]],
-#                        price_data[list(price_data.keys())[6]], price_data[list(price_data.keys())[7]],
-#                        price_data[list(price_data.keys())[8]], price_data[list(price_data.keys())[9]],
-#                        price_data[list(price_data.keys())[10]]])
+ohlc_data = pd.concat([price_data[list(price_data.keys())[0]], price_data[list(price_data.keys())[1]],
+                       price_data[list(price_data.keys())[2]], price_data[list(price_data.keys())[3]],
+                       price_data[list(price_data.keys())[4]], price_data[list(price_data.keys())[5]],
+                       price_data[list(price_data.keys())[6]], price_data[list(price_data.keys())[7]],
+                       price_data[list(price_data.keys())[8]], price_data[list(price_data.keys())[9]],
+                       price_data[list(price_data.keys())[10]]])
 
-# 2013 dataset
-ohlc_data = pd.concat([price_data[list(price_data.keys())[10]]])
+# Co
+# ohlc_data = pd.concat([price_data[list(price_data.keys())[10]]])
 
 # reset index
 ohlc_data.reset_index(inplace=True, drop=True)

@@ -14,14 +14,18 @@ import visualizations as vs
 import data as dt
 import functions as fn
 import warnings
+from datetime import datetime
 import pandas as pd
 warnings.filterwarnings("ignore")
+
+# General dataframe with all the data for the project
+general_data = dt.ohlc_data.copy()
 
 # ------------------------------------------------------------- PLOT 1: MXN/USD Historical Future Prices -- #
 # --------------------------------------------------------------- -------------------------------------- -- #
 
 # plot 1 : time series candlesticks OHLC historical prices
-plot_1 = vs.g_ohlc(p_ohlc=dt.ohlc_data, p_theme=dt.theme_plot_1, p_vlines=None)
+plot_1 = vs.g_ohlc(p_ohlc=general_data, p_theme=dt.theme_plot_1, p_vlines=None)
 
 # show plot in explorer
 # plot_1.show()
@@ -33,15 +37,15 @@ plot_1 = vs.g_ohlc(p_ohlc=dt.ohlc_data, p_theme=dt.theme_plot_1, p_vlines=None)
 # ------------------------------------------------------------------- ---------------------------------- -- #
 
 # data description
-table_1 = dt.ohlc_data.describe()
+table_1 = general_data.describe()
 
 # --------------------------------------------------------- Timeseries T-Folds Blocks Without Filtration -- #
 # --------------------------------------------------------- -------------------------------------------- -- #
 
 # # in quarters obtain 4 folds for each year
-t_folds = fn.t_folds(p_data=dt.ohlc_data, p_period='semester')
+t_folds = fn.t_folds(p_data=general_data, p_period='semester')
 # drop the last quarter because it is incomplete until december 31
-# t_folds.pop('q_04_2020', None)
+t_folds.pop('q_04_2020', None)
 
 # in quarters obtain 4 folds for each year
 # t_folds = fn.t_folds(p_data=dt.ohlc_data, p_period='semester')
@@ -56,7 +60,7 @@ for fold in t_folds:
     dates_folds.append(t_folds[fold]['timestamp'].iloc[-1])
 
 # grafica OHLC
-plot_2 = vs.g_ohlc(p_ohlc=dt.ohlc_data,
+plot_2 = vs.g_ohlc(p_ohlc=general_data,
                    p_theme=dt.theme_plot_2, p_vlines=dates_folds)
 
 # mostrar grafica
@@ -68,37 +72,38 @@ plot_2 = vs.g_ohlc(p_ohlc=dt.ohlc_data,
 # ----------------------------------------------------------------- Features - Train/Optimization - Test -- #
 # ----------------------------------------------------------------- ------------------------------------ -- #
 
+# initialization of code running
+print(datetime.now())
+
 # list with the names of the models
 ml_models = list(dt.models.keys())
 
 # -- --------------------------------------------------------------- Run Process (WARNING - Takes Hours) -- #
-global_evaluations = fn.folds_evaluations(p_data_folds=t_folds, p_models=ml_models,
-                                          p_saving=False, p_file_name='Genetic_Net_Semester.dat')
-
+# global_evaluations = fn.folds_evaluations(p_data_folds=t_folds, p_models=ml_models,
+#                                           p_saving=False, p_file_name='Genetic_Net_Semester.dat')
+#
 # dt.data_save_load(p_data_objects=global_evaluations,
 #                   p_data_action='save', p_data_file='Genetico_Net_Semester.dat')
-
+#
+# # ending of code running
+# print(datetime.now())
 
 # -- ------------------------------------------------------------------------- Load Data for offline use -- #
-# global_data = dt.data_save_load(p_data_objects=None, p_data_action='load',
-#                                 p_data_file='files/pickle_rick/Genetic_Net_Quarter.dat')
-
-global_cases = global_evaluations['memory_palace']
+memory_palace = dt.data_save_load(p_data_objects=None, p_data_action='load',
+                                  p_data_file='files/pickle_rick/Genetic_Net_Semester.dat')
 
 # -- ----------------------------------------------------------------------------- AUC Min and Max cases -- #
 # -- ----------------------------------------------------------------------------- --------------------- -- #
 
 # min and max AUC cases for the models
-auc_cases = fn.models_auc(p_models=ml_models, p_global_cases=global_cases, p_data_folds=t_folds)
+auc_cases = fn.models_auc(p_models=ml_models, p_global_cases=memory_palace, p_data_folds=t_folds)
 
 # -- -------------------------------------------------------------------------- Model Global Performance -- #
 # -- ----------------------------------------------------------------------------- --------------------- -- #
 
-# extract the features of both the min AUC and max AUC cases
-global_features = []
-
 # model performance for all models, with the min and max AUC parameters
-global_evaluations = fn.model_evaluation(p_features=global_features, p_models=ml_models, p_cases=auc_cases)
+global_evaluations = fn.model_evaluation(p_data=general_data, p_memory=7, p_global_cases=memory_palace,
+                                         p_models=ml_models, p_cases=auc_cases)
 
 # -- ------------------------------------------------------------- PLOT 3: Classification Global Results -- #
 # -- ----------------------------------------------------------------------------- --------------------- -- #
