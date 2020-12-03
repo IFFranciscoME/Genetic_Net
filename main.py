@@ -125,7 +125,7 @@ ohlc_class = {'train_y': train_y['y_train'], 'train_y_pred': train_y['y_train_pr
               'test_y': test_y['y_test'], 'test_y_pred': test_y['y_test_pred']}
 
 # make plot
-plot_3 = vs.g_ohlc_class(p_ohlc=ohlc_prices, p_theme=dt.theme_plot_2, p_data_class=ohlc_class)
+plot_3 = vs.g_ohlc_class(p_ohlc=ohlc_prices, p_theme=dt.theme_plot_3, p_data_class=ohlc_class)
 
 # visualize plot
 plot_3.show()
