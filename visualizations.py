@@ -385,12 +385,28 @@ def g_ohlc_class(p_ohlc, p_theme, p_data_class):
     # Instantiate a figure object
     fig_g_ohlc = go.Figure()
 
+    train_error = []
+    for row in p_data_class['train_y'].index.to_list():
+        if p_data_class['train_y'][row] != p_data_class['train_y_pred'][row]:
+            train_error.append(row)
+
+    test_error = []
+    for row in p_data_class['test_y'].index.to_list():
+        if p_data_class['test_y'][row] != p_data_class['test_y_pred'][row]:
+            test_error.append(row)
+
+    train_test_error = train_error + test_error
+
     # Add layer for OHLC candlestick chart
-    fig_g_ohlc.add_trace(go.Candlestick(name='Error', x=p_ohlc['timestamp'], open=p_ohlc['open'],
-                                        high=p_ohlc['high'], low=p_ohlc['low'], close=p_ohlc['close'],
-                                        increasing={'line': {'color': 'red'}},
-                                        decreasing={'line': {'color': 'red'}},
-                                        opacity=0.7))
+    fig_g_ohlc.add_trace(go.Candlestick(
+        x=[p_ohlc['timestamp'].iloc[i] for i in train_test_error],
+        open=[p_ohlc['open'].iloc[i] for i in train_test_error],
+        high=[p_ohlc['high'].iloc[i] for i in train_test_error],
+        low=[p_ohlc['low'].iloc[i] for i in train_test_error],
+        close=[p_ohlc['close'].iloc[i] for i in train_test_error],
+        increasing={'line': {'color': 'red'}},
+        decreasing={'line': {'color': 'red'}},
+        name='Prediction Error'))
 
     train_successes = []
     for row in p_data_class['train_y'].index.to_list():
@@ -412,7 +428,7 @@ def g_ohlc_class(p_ohlc, p_theme, p_data_class):
         close=[p_ohlc['close'].iloc[i] for i in train_test_successes],
         increasing={'line': {'color': 'skyblue'}},
         decreasing={'line': {'color': 'skyblue'}},
-        name='Correct'))
+        name='Prediction Success'))
 
     # Update layout for the background
     fig_g_ohlc.update_layout(yaxis=dict(tickfont=dict(color='grey', size=p_theme['p_fonts']['font_axis']),
@@ -423,10 +439,10 @@ def g_ohlc_class(p_ohlc, p_theme, p_data_class):
     fig_g_ohlc.update_xaxes(rangebreaks=[dict(pattern="day of week", bounds=['sat', 'sun'])])
 
     # Formato para titulo
-    fig_g_ohlc.update_layout(legend=go.layout.Legend(x=.43, y=-.51, orientation='h',
+    fig_g_ohlc.update_layout(legend=go.layout.Legend(x=.37, y=-.511, orientation='h',
                                                      bordercolor='dark grey',
                                                      borderwidth=1,
-                                                     font=dict(size=18)))
+                                                     font=dict(size=17)))
 
     # Update layout for the background
     fig_g_ohlc.update_layout(title_font_size=p_theme['p_fonts']['font_title'],
