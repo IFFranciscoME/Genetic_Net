@@ -43,19 +43,17 @@ table_1 = general_data.describe()
 # --------------------------------------------------------- -------------------------------------------- -- #
 
 # # in quarters obtain 4 folds for each year
-t_folds = fn.t_folds(p_data=general_data, p_period='semester')
+t_folds = fn.t_folds(p_data=general_data.copy(), p_period='quarter')
 # drop the last quarter because it is incomplete until december 31
 t_folds.pop('q_04_2020', None)
-
-# in quarters obtain 4 folds for each year
-# t_folds = fn.t_folds(p_data=dt.ohlc_data, p_period='semester')
 
 # -- ----------------------------------------------------------------- PLOT 2: Time Series Block T-Folds -- #
 # -- ----------------------------------------------------------------- --------------------------------- -- #
 
 # construccion de fechas para lineas verticales de division de cada fold
 dates_folds = []
-for fold in t_folds:
+for fold in list(t_folds.keys()):
+    print(fold)
     dates_folds.append(t_folds[fold]['timestamp'].iloc[0])
     dates_folds.append(t_folds[fold]['timestamp'].iloc[-1])
 
@@ -73,24 +71,24 @@ plot_2 = vs.g_ohlc(p_ohlc=general_data,
 # ----------------------------------------------------------------- ------------------------------------ -- #
 
 # initialization of code running
-print(datetime.now())
+# print(datetime.now())
 
 # list with the names of the models
 ml_models = list(dt.models.keys())
 
 # -- --------------------------------------------------------------- Run Process (WARNING - Takes Hours) -- #
 # global_evaluations = fn.folds_evaluations(p_data_folds=t_folds, p_models=ml_models,
-#                                           p_saving=False, p_file_name='Genetic_Net_Semester.dat')
+#                                           p_saving=False, p_file_name='Genetic_Net_Year.dat')
 #
 # dt.data_save_load(p_data_objects=global_evaluations,
-#                   p_data_action='save', p_data_file='Genetico_Net_Semester.dat')
+#                   p_data_action='save', p_data_file='Genetic_Net_Year.dat')
 #
 # # ending of code running
 # print(datetime.now())
 
 # -- ------------------------------------------------------------------------- Load Data for offline use -- #
 memory_palace = dt.data_save_load(p_data_objects=None, p_data_action='load',
-                                  p_data_file='files/pickle_rick/Genetic_Net_Semester.dat')
+                                  p_data_file='files/pickle_rick/Genetic_Net_Quarter.dat')
 
 # -- ----------------------------------------------------------------------------- AUC Min and Max cases -- #
 # -- ----------------------------------------------------------------------------- --------------------- -- #
@@ -101,28 +99,36 @@ auc_cases = fn.models_auc(p_models=ml_models, p_global_cases=memory_palace, p_da
 # -- -------------------------------------------------------------------------- Model Global Performance -- #
 # -- ----------------------------------------------------------------------------- --------------------- -- #
 
-# model performance for all models, with the min and max AUC parameters
-global_evaluations = fn.model_evaluation(p_data=general_data, p_memory=7, p_global_cases=memory_palace,
-                                         p_models=ml_models, p_cases=auc_cases)
+# # model performance for all models, with the min and max AUC parameters
+# global_evaluations = fn.model_evaluation(p_data=general_data, p_memory=7, p_global_cases=memory_palace,
+#                                          p_models=ml_models, p_cases=auc_cases)
 
 # -- ------------------------------------------------------------- PLOT 3: Classification Global Results -- #
 # -- ----------------------------------------------------------------------------- --------------------- -- #
 
-obs_class = list(global_features['train_y']) + list(global_features['test_y'])
-obs_class = [-1 if x == 0 else 1 for x in obs_class]
+# pick case
+case = 'max'
 
-model_data = global_evaluations['ann-mlp']['auc_max']['results']['data']
-pred_class = list(model_data['train']['y_train_pred']) + list(model_data['test']['y_test_pred'])
-pred_class = [-1 if x == 0 else 1 for x in pred_class]
-x_series = list(dt.ohlc_data['timestamp'])
+# pick model to generate the plot
+auc_model = 'ann-mlp'
 
-# Classification results plot
-plot_3 = vs.g_relative_bars(p_x=x_series, p_y0=obs_class, p_y1=pred_class, p_theme=dt.theme_plot_3)
+# generate title
+auc_title = 'max AUC for: ' + auc_model + ' found in period: ' + auc_cases[auc_model]['auc_max']['period']
 
-# offline plot
-# plot_3.show()
+# get data from auc_cases
+train_y = auc_cases[auc_model]['auc' + '_' + case]['data']['results']['data']['train']
+test_y = auc_cases[auc_model]['auc' + '_' + case]['data']['results']['data']['test']
 
-# online plot
+# get data for prices and predictions
+ohlc_prices = t_folds[auc_cases[auc_model]['auc' + '_' + case]['period']]
+ohlc_class = {'train_y': train_y['y_train'], 'train_y_pred': train_y['y_train_pred'],
+              'test_y': test_y['y_test'], 'test_y_pred': test_y['y_test_pred']}
+
+# make plot
+plot_3 = vs.g_ohlc_class(p_ohlc=ohlc_prices, p_theme=dt.theme_plot_2, p_data_class=ohlc_class)
+
+# visualize plot
+plot_3.show()
 
 # -- ------------------------------------------------------------- PLOT 4: Classification Global Results -- #
 # -- ----------------------------------------------------------------------------- --------------------- -- #

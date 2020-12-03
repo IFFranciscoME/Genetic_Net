@@ -110,25 +110,10 @@ def t_folds(p_data, p_period):
     """
 
     # data scaling by standarization
-    p_data.iloc[:, 1:] = data_scaler(p_data=p_data.copy(), p_trans='Standard')
-
-    # For monthly separation of the data
-    if p_period == 'month':
-        # List of months in the dataset
-        months = list(set(time.month for time in list(p_data['timestamp'])))
-        # List of years in the dataset
-        years = list(set(time.year for time in list(p_data['timestamp'])))
-        m_data = {}
-        # New key for every month_year
-        for j in years:
-            m_data.update({'m_' + str('0') + str(i) + '_' + str(j) if i <= 9 else str(i) + '_' + str(j):
-                               p_data[(pd.to_datetime(p_data['timestamp']).dt.month == i) &
-                                      (pd.to_datetime(p_data['timestamp']).dt.year == j)]
-                           for i in months})
-        return m_data
+    # p_data.iloc[:, 1:] = data_scaler(p_data=p_data.copy(), p_trans='Standard')
 
     # For quarterly separation of the data
-    elif p_period == 'quarter':
+    if p_period == 'quarter':
         # List of quarters in the dataset
         quarters = list(set(time.quarter for time in list(p_data['timestamp'])))
         # List of years in the dataset
@@ -161,6 +146,18 @@ def t_folds(p_data, p_period):
                                        (pd.to_datetime(p_data['timestamp']).dt.quarter == 4))]})
 
         return s_data
+
+        # For quarterly separation of the data
+    elif p_period == 'year':
+        # List of years in the dataset
+        years = set(time.year for time in list(p_data['timestamp']))
+        y_data = {}
+        # New key for every quarter_year
+        for y in sorted(list(years)):
+            # y = sorted(list(years))[0]
+            y_data.update({'y_' + str(y):
+                               p_data[(pd.to_datetime(p_data['timestamp']).dt.year == y)]})
+        return y_data
 
     # In the case a different label has been receieved
     return 'Error: verify parameters'
@@ -309,7 +306,7 @@ def symbolic_features(p_x, p_y):
                                 metric='pearson', parsimony_coefficient=0.01,
                                 p_crossover=0.4, p_subtree_mutation=0.3, p_hoist_mutation=0.1,
                                 p_point_mutation=0.2, p_point_replace=.05,
-                                verbose=1, random_state=None, n_jobs=-1, feature_names=p_x.columns,
+                                verbose=1, random_state=None, n_jobs=7, feature_names=p_x.columns,
                                 warm_start=True)
 
     # result of fit with the SymbolicTransformer function
@@ -478,7 +475,7 @@ def logistic_net(p_data, p_params):
 
     # Fit model
     en_model = LogisticRegression(l1_ratio=p_params['ratio'], C=p_params['c'], tol=1e-3,
-                                  penalty='elasticnet', solver='saga', multi_class='ovr', n_jobs=-1,
+                                  penalty='elasticnet', solver='saga', multi_class='ovr', n_jobs=7,
                                   max_iter=5000, fit_intercept=False)
 
     # model fit
@@ -1168,8 +1165,11 @@ def folds_evaluations(p_data_folds, p_models, p_saving, p_file_name):
             print('----------------------- Ingenieria de Variables por Periodo ------------------------')
             print('----------------------- ----------------------------------- ------------------------')
 
+            # scale data of the corresponding fold to evaluate
+            data_folds = data_scaler(p_data=p_data_folds[period].copy(), p_trans='Standard')
+
             # Feature engineering (Autoregressive, Hadamard, Symbolic)
-            m_features = genetic_programed_features(p_data=p_data_folds[period], p_memory=7)
+            m_features = genetic_programed_features(p_data=data_folds, p_memory=7)
 
             # Save features used in the evaluation in memory_palace
             memory_palace[model][period]['features'] = m_features

@@ -360,3 +360,60 @@ def g_timeseries_auc(p_data_auc, p_theme):
     fig_ts_auc.layout.height = p_theme['p_dims']['height']
 
     return fig_ts_auc
+
+
+# -- -------------------------------------------- PLOT: OHLC Candlesticks + Colored Classificator Result -- #
+# -- --------------------------------------------------------------------------------------------------- -- #
+
+def g_ohlc_class(p_ohlc, p_theme, p_data_class):
+
+    # default value for lables to use in main title, and both x and y axisp_fonts
+    if p_theme['p_labels'] is not None:
+        p_labels = p_theme['p_labels']
+    else:
+        p_labels = {'title': 'Main title', 'x_title': 'x axis title', 'y_title': 'y axis title'}
+
+    # tick values calculation for simetry in y axes
+    y0_ticks_vals = np.arange(min(p_ohlc['low']), max(p_ohlc['high']),
+                              (max(p_ohlc['high']) - min(p_ohlc['low'])) / 10)
+
+    y0_ticks_vals = np.append(y0_ticks_vals, max(p_ohlc['high']))
+    y0_ticks_vals = np.round(y0_ticks_vals, 5)
+
+    p_ohlc.reset_index(inplace=True, drop=True)
+
+    # Instantiate a figure object
+    fig_g_ohlc = go.Figure()
+
+    # Add layer for OHLC candlestick chart
+    fig_g_ohlc.add_trace(go.Candlestick(name='Error', x=p_ohlc['timestamp'], open=p_ohlc['open'],
+                                        high=p_ohlc['high'], low=p_ohlc['low'], close=p_ohlc['close'],
+                                        increasing={'line': {'color': 'red'}},
+                                        decreasing={'line': {'color': 'red'}},
+                                        opacity=0.7))
+
+    train_successes = []
+    for row in p_data_class['train_y'].index.to_list():
+        if p_data_class['train_y'][row] == p_data_class['train_y_pred'][row]:
+            train_successes.append(row)
+
+    test_successes = []
+    for row in p_data_class['test_y'].index.to_list():
+        if p_data_class['test_y'][row] == p_data_class['test_y_pred'][row]:
+            test_successes.append(row)
+
+    train_test_successes = train_successes + test_successes
+
+    fig_g_ohlc.add_trace(go.Candlestick(
+        x=[p_ohlc['timestamp'].iloc[i] for i in train_test_successes],
+        open=[p_ohlc['open'].iloc[i] for i in train_test_successes],
+        high=[p_ohlc['high'].iloc[i] for i in train_test_successes],
+        low=[p_ohlc['low'].iloc[i] for i in train_test_successes],
+        close=[p_ohlc['close'].iloc[i] for i in train_test_successes],
+        increasing={'line': {'color': 'skyblue'}},
+        decreasing={'line': {'color': 'skyblue'}},
+        name='Correct'))
+
+    fig_g_ohlc.show()
+
+    return 1
