@@ -15,8 +15,8 @@ import pandas as pd
 import plotly.graph_objects as go
 import chart_studio
 import chart_studio.plotly as py
-import plotly.io as pio
-pio.renderers.default = "browser"
+# import plotly.io as pio
+# pio.renderers.default = "browser"
 
 # -- ------------------------------------------------------------------------- ONLINE PLOTLY CREDENTIALS -- #
 # -- --------------------------------------------------------------------------------------------------- -- #
@@ -365,7 +365,7 @@ def g_timeseries_auc(p_data_auc, p_theme):
 # -- -------------------------------------------- PLOT: OHLC Candlesticks + Colored Classificator Result -- #
 # -- --------------------------------------------------------------------------------------------------- -- #
 
-def g_ohlc_class(p_ohlc, p_theme, p_data_class):
+def g_ohlc_class(p_ohlc, p_theme, p_data_class, p_vlines):
 
     # default value for lables to use in main title, and both x and y axisp_fonts
     if p_theme['p_labels'] is not None:
@@ -411,6 +411,11 @@ def g_ohlc_class(p_ohlc, p_theme, p_data_class):
     # Instantiate a figure object
     fig_g_ohlc = go.Figure()
 
+    # Layout for margin, and both x and y axes
+    fig_g_ohlc.update_layout(margin=go.layout.Margin(l=50, r=50, b=20, t=50, pad=20),
+                             xaxis=dict(title_text=p_labels['x_title']),
+                             yaxis=dict(title_text=p_labels['y_title']))
+
     # Add layer for the error based color of candles in OHLC candlestick chart
     fig_g_ohlc.add_trace(go.Candlestick(
         x=[p_ohlc['timestamp'].iloc[i] for i in train_test_error],
@@ -441,18 +446,32 @@ def g_ohlc_class(p_ohlc, p_theme, p_data_class):
     # Update layout for the y axis
     fig_g_ohlc.update_xaxes(rangebreaks=[dict(pattern="day of week", bounds=['sat', 'sun'])])
 
+    # If parameter vlines is used
+    if p_vlines is not None:
+        # Dynamically add vertical lines according to the provided list of x dates.
+        shapes_list = list()
+        for i in p_vlines:
+            shapes_list.append({'type': 'line', 'fillcolor': p_theme['p_colors']['color_1'],
+                                'line': {'color': p_theme['p_colors']['color_1'],
+                                         'dash': 'dashdot', 'width': 3},
+                                'x0': i, 'x1': i, 'xref': 'x',
+                                'y0': min(p_ohlc['low']), 'y1': max(p_ohlc['high']), 'yref': 'y'})
+
+        # add v_lines to the layout
+        fig_g_ohlc.update_layout(shapes=shapes_list)
+
     # Formato para titulo
-    fig_g_ohlc.update_layout(legend=go.layout.Legend(x=.37, y=-.511, orientation='h',
+    fig_g_ohlc.update_layout(legend=go.layout.Legend(x=.35, y=-.3, orientation='h',
                                                      bordercolor='dark grey',
                                                      borderwidth=1,
-                                                     font=dict(size=17)))
+                                                     font=dict(size=p_theme['p_fonts']['font_axis'])))
 
     # Update layout for the background
     fig_g_ohlc.update_layout(title_font_size=p_theme['p_fonts']['font_title'],
-                             title=dict(x=0.5, text='Grafica 1:' + '<b> ' + p_labels['title'] + ' </b>'),
+                             title=dict(x=0.5, text='<b> ' + p_labels['title'] + ' </b>'),
                              yaxis=dict(title=p_labels['y_title'],
                                         titlefont=dict(size=p_theme['p_fonts']['font_axis'] + 4)),
-                             xaxis=dict(title=p_labels['x_title'],
+                             xaxis=dict(title=p_labels['x_title'], rangeslider=dict(visible=False),
                                         titlefont=dict(size=p_theme['p_fonts']['font_axis'] + 4)))
 
     # Final plot dimensions

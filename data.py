@@ -136,36 +136,36 @@ models = {
 
 # Plot_1 : Original Historical OHLC prices
 theme_plot_1 = dict(p_colors={'color_1': '#6b6b6b', 'color_2': '#ABABAB', 'color_3': '#ABABAB'},
-                    p_fonts={'font_title': 20, 'font_axis': 16, 'font_ticks': 12},
-                    p_dims={'width': 1600, 'height': 800},
+                    p_fonts={'font_title': 18, 'font_axis': 16, 'font_ticks': 8},
+                    p_dims={'width': 975, 'height': 500},
                     p_labels={'title': 'Precios OHLC',
                               'x_title': 'Fechas', 'y_title': 'Futuros USD/MXN'})
 
 # Plot_2 : Timeseries T-Folds blocks without filtration
 theme_plot_2 = dict(p_colors={'color_1': '#6b6b6b', 'color_2': '#ABABAB', 'color_3': '#ABABAB'},
-                    p_fonts={'font_title': 20, 'font_axis': 16, 'font_ticks': 12},
-                    p_dims={'width': 1600, 'height': 800},
+                    p_fonts={'font_title': 18, 'font_axis': 16, 'font_ticks': 8},
+                    p_dims={'width': 975, 'height': 500},
                     p_labels={'title': 'T-Folds por Bloques Sin Filtraciones',
                               'x_title': 'Fechas', 'y_title': 'Futuros USD/MXN'})
 
 # Plot_3 Observed Class vs Predicted Class
 theme_plot_3 = dict(p_colors={'color_1': '#6b6b6b', 'color_2': '#ABABAB', 'color_3': '#ABABAB'},
-                    p_fonts={'font_title': 20, 'font_axis': 16, 'font_ticks': 12},
-                    p_dims={'width': 1600, 'height': 800},
+                    p_fonts={'font_title': 18, 'font_axis': 16, 'font_ticks': 8},
+                    p_dims={'width': 975, 'height': 500},
                     p_labels={'title': 'Clasificaciones',
                               'x_title': 'Fechas', 'y_title': 'Clasificacion'})
 
 # Plot_4 ROC of models
 theme_plot_4 = dict(p_colors={'color_1': '#6b6b6b', 'color_2': '#ABABAB', 'color_3': '#ABABAB'},
-                    p_fonts={'font_title': 20, 'font_axis': 16, 'font_ticks': 12},
-                    p_dims={'width': 1600, 'height': 800},
+                    p_fonts={'font_title': 18, 'font_axis': 16, 'font_ticks': 8},
+                    p_dims={'width': 975, 'height': 500},
                     p_labels={'title': 'ROC',
                               'x_title': 'FPR', 'y_title': 'TPR'})
 
 # Plot_5 AUC Timeseries of models
 theme_plot_5 = dict(p_colors={'color_1': '#6b6b6b', 'color_2': '#ABABAB', 'color_3': '#ABABAB'},
-                    p_fonts={'font_title': 20, 'font_axis': 16, 'font_ticks': 12},
-                    p_dims={'width': 1600, 'height': 800},
+                    p_fonts={'font_title': 18, 'font_axis': 16, 'font_ticks': 8},
+                    p_dims={'width': 975, 'height': 500},
                     p_labels={'title': 'AUC por periodo (Test Data)',
                               'x_title': 'Periodos', 'y_title': 'AUC'})
 
