@@ -376,28 +376,42 @@ def g_ohlc_class(p_ohlc, p_theme, p_data_class):
     # tick values calculation for simetry in y axes
     y0_ticks_vals = np.arange(min(p_ohlc['low']), max(p_ohlc['high']),
                               (max(p_ohlc['high']) - min(p_ohlc['low'])) / 5)
-
     y0_ticks_vals = np.append(y0_ticks_vals, max(p_ohlc['high']))
     y0_ticks_vals = np.round(y0_ticks_vals, 4)
 
+    # reset the index of the input data
     p_ohlc.reset_index(inplace=True, drop=True)
+
+    # auxiliar lists
+    train_error = []
+    test_error = []
+    test_success = []
+    train_success = []
+
+    # error and success in train
+    for row in p_data_class['train_y'].index.to_list():
+        if p_data_class['train_y'][row] != p_data_class['train_y_pred'][row]:
+            train_error.append(row)
+        else:
+            train_success.append(row)
+
+    # error and success in test
+    for row in p_data_class['test_y'].index.to_list():
+        if p_data_class['test_y'][row] != p_data_class['test_y_pred'][row]:
+            test_error.append(row)
+        else:
+            test_success.append(row)
+
+    # train and test errors in a list
+    train_test_error = train_error + test_error
+
+    # train and test success in a list
+    train_test_success = train_success + test_success
 
     # Instantiate a figure object
     fig_g_ohlc = go.Figure()
 
-    train_error = []
-    for row in p_data_class['train_y'].index.to_list():
-        if p_data_class['train_y'][row] != p_data_class['train_y_pred'][row]:
-            train_error.append(row)
-
-    test_error = []
-    for row in p_data_class['test_y'].index.to_list():
-        if p_data_class['test_y'][row] != p_data_class['test_y_pred'][row]:
-            test_error.append(row)
-
-    train_test_error = train_error + test_error
-
-    # Add layer for OHLC candlestick chart
+    # Add layer for the error based color of candles in OHLC candlestick chart
     fig_g_ohlc.add_trace(go.Candlestick(
         x=[p_ohlc['timestamp'].iloc[i] for i in train_test_error],
         open=[p_ohlc['open'].iloc[i] for i in train_test_error],
@@ -408,24 +422,13 @@ def g_ohlc_class(p_ohlc, p_theme, p_data_class):
         decreasing={'line': {'color': 'red'}},
         name='Prediction Error'))
 
-    train_successes = []
-    for row in p_data_class['train_y'].index.to_list():
-        if p_data_class['train_y'][row] == p_data_class['train_y_pred'][row]:
-            train_successes.append(row)
-
-    test_successes = []
-    for row in p_data_class['test_y'].index.to_list():
-        if p_data_class['test_y'][row] == p_data_class['test_y_pred'][row]:
-            test_successes.append(row)
-
-    train_test_successes = train_successes + test_successes
-
+    # Add layer for the success based color of candles in OHLC candlestick chart
     fig_g_ohlc.add_trace(go.Candlestick(
-        x=[p_ohlc['timestamp'].iloc[i] for i in train_test_successes],
-        open=[p_ohlc['open'].iloc[i] for i in train_test_successes],
-        high=[p_ohlc['high'].iloc[i] for i in train_test_successes],
-        low=[p_ohlc['low'].iloc[i] for i in train_test_successes],
-        close=[p_ohlc['close'].iloc[i] for i in train_test_successes],
+        x=[p_ohlc['timestamp'].iloc[i] for i in train_test_success],
+        open=[p_ohlc['open'].iloc[i] for i in train_test_success],
+        high=[p_ohlc['high'].iloc[i] for i in train_test_success],
+        low=[p_ohlc['low'].iloc[i] for i in train_test_success],
+        close=[p_ohlc['close'].iloc[i] for i in train_test_success],
         increasing={'line': {'color': 'skyblue'}},
         decreasing={'line': {'color': 'skyblue'}},
         name='Prediction Success'))
