@@ -10,6 +10,7 @@
 # -- --------------------------------------------------------------------------------------------------- -- #
 """
 
+import matplotlib.pyplot as plt
 import visualizations as vs
 import data as dt
 import functions as fn
@@ -203,7 +204,9 @@ t_model_3['hidden_layers'] = [str(i) for i in list(t_model_3['hidden_layers'])]
 # -- ------------------------------------------------------------------------------- ------------------- -- #
 
 # object for time keeping
-times = {'Quarter': [], 'Semester': [], 'Year': []}
+times = {'Quarter': {'whole_period': [], 'mean_periods': [], 'periods': []},
+         'Semester': {'whole_period': [], 'mean_periods': [], 'periods': []},
+         'Year': {'whole_period': [], 'mean_periods': [], 'periods': []}}
 
 for size in times.keys():
     # load data
@@ -218,8 +221,40 @@ for size in times.keys():
     ml_models = list(dt.models.keys())
     period_times = list()
     # iterate to have all the times for each period for each model
+    times_model = {}
     for model in ml_models:
+        times_model[model] = times
         for period in list(t_folds.keys()):
-            period_times.append(memory_palace[model][period]['time'].seconds)
+            period_times.append(memory_palace[model][period]['time'].seconds/60)
+        times_model[model][size]['whole_period'].append(np.sum(period_times))
+        times_model[model][size]['periods'].append(period_times)
+        times_model[model][size]['mean_periods'].append(np.mean(period_times))
 
-    times[size] = np.mean(period_times)
+
+ind = [1, 2, 3]
+# ajuste polinomial a promedios de valores de count
+pl = np.polyfit(x=np.arange(0, len(ind)), y=times['Quarter']['whole_period'], deg=1)
+pl = np.poly1d(pl)
+
+pc = np.polyfit(x=np.arange(0, len(ind)), y=times['Quarter']['whole_period'], deg=2)
+pc = np.poly1d(pc)
+
+# construccion de grafica
+plt.plot(ind, times['Quarter']['whole_period'], 'b*')
+
+plt.plot(ind, pl(np.arange(0, len(ind))), 'r**')
+plt.plot(ind, pc(np.arange(0, len(ind))), 'r--')
+plt.suptitle("Analisis de complejidad $(posteriori)$")
+plt.title('logistic-net + l1-svm + ann-mlp', fontsize=10)
+plt.legend(["Tiempos", "$O(N)$", "$O(N^2)$"])
+plt.xlabel("Tamaño DataSet (1=Trim, 2=Sem, 3=Anual)")
+plt.ylabel("Minutos en correr 10 años")
+
+# construccion de ecuacion para O(n^2)
+eqn = str(round(list(pc.coefficients)[0], 1)) + 'x^2' + ' + ' + \
+      str(round(list(pc.coefficients)[1], 1)) + 'x' + ' + '
+
+plt.text(1.5, 250, '$y=' + eqn + '$', {'color': 'r', 'fontsize': 8})
+
+# mostrar plot
+plt.show()

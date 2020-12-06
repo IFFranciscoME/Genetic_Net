@@ -19,12 +19,12 @@ Or you can manually install one by one using the name and version in the file.
 - Classifier model: Logistic Regression with Elastic Net Regularization (**logistic_net**)
 - Classifier model: Least Squares Support Vector Machines (**ls_svm**)
 - Classifier model: Artificial Neural Net Multilayer Perceptron (**ann_mlp**)
-- Genetic Algorithms Optimization (**genetic_algo_optimisation**)
+- Genetic Algorithms Optimization (**genetic_algo_optimization**)
 - Plotly visualizations of results (**visualizations.py**)
-- Machine Learning Models Performance Metrics (**t_folds**)
+- Machine Learning Models Performance Metrics (**model_evaluation**)
 
 ## Author
-B.Eng in Financial Engineering and Soon to be M.Sc in Data Science, Juan Francisco Muñoz-Elguezabal
+B.Eng in Financial Engineering, M.Sc in Data Science candidate, Juan Francisco Muñoz-Elguezabal
 
 ## License
 **GNU General Public License v3.0** 
