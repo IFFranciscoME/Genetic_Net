@@ -205,9 +205,6 @@ t_model_3['hidden_layers'] = [str(i) for i in list(t_model_3['hidden_layers'])]
 # object for time keeping
 times = {'Quarter': [], 'Semester': [], 'Year': []}
 
-# period size
-size = 'Year'
-
 for size in times.keys():
     # load data
     memory_palace = dt.data_save_load(p_data_objects=None, p_data_action='load',
@@ -217,16 +214,12 @@ for size in times.keys():
     t_folds = fn.t_folds(p_data=general_data.copy(), p_period=size)
     # drop the last quarter because it is incomplete until december 31
     t_folds.pop('q_04_2020', None)
-
     # list with the names of the models
     ml_models = list(dt.models.keys())
-
-    model = ml_models[0]
-    period = list(t_folds.keys())[0]
-    tiempos = list()
-
+    period_times = list()
+    # iterate to have all the times for each period for each model
     for model in ml_models:
         for period in list(t_folds.keys()):
-            tiempos.append(memory_palace[model][period]['time'].seconds)
+            period_times.append(memory_palace[model][period]['time'].seconds)
 
-    times[size] = np.mean(tiempos)
+    times[size] = np.mean(period_times)
