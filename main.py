@@ -16,6 +16,7 @@ import functions as fn
 import warnings
 from datetime import datetime
 import pandas as pd
+import numpy as np
 warnings.filterwarnings("ignore")
 
 # General dataframe with all the data for the project
@@ -23,6 +24,9 @@ general_data = dt.ohlc_data.copy()
 
 # ------------------------------------------------------------- PLOT 1: MXN/USD Historical Future Prices -- #
 # --------------------------------------------------------------- -------------------------------------- -- #
+
+# Override plot main title
+dt.theme_plot_1['p_labels']['title'] = 'Gráfica 1: <b> Precios Históricos OHLC </b>'
 
 # plot 1 : time series candlesticks OHLC historical prices
 plot_1 = vs.g_ohlc(p_ohlc=general_data, p_theme=dt.theme_plot_1, p_vlines=None)
@@ -43,7 +47,7 @@ table_1 = general_data.describe()
 # --------------------------------------------------------- -------------------------------------------- -- #
 
 # # in quarters obtain 4 folds for each year
-t_folds = fn.t_folds(p_data=general_data.copy(), p_period='quarter')
+t_folds = fn.t_folds(p_data=general_data.copy(), p_period='Quarter')
 # drop the last quarter because it is incomplete until december 31
 t_folds.pop('q_04_2020', None)
 
@@ -53,7 +57,6 @@ t_folds.pop('q_04_2020', None)
 # construccion de fechas para lineas verticales de division de cada fold
 dates_folds = []
 for fold in list(t_folds.keys()):
-    print(fold)
     dates_folds.append(t_folds[fold]['timestamp'].iloc[0])
     dates_folds.append(t_folds[fold]['timestamp'].iloc[-1])
 
@@ -125,7 +128,8 @@ ohlc_class = {'train_y': train_y['y_train'], 'train_y_pred': train_y['y_train_pr
               'test_y': test_y['y_test'], 'test_y_pred': test_y['y_test_pred']}
 
 # make plot
-plot_3 = vs.g_ohlc_class(p_ohlc=ohlc_prices, p_theme=dt.theme_plot_3, p_data_class=ohlc_class)
+plot_3 = vs.g_ohlc_class(p_ohlc=ohlc_prices, p_theme=dt.theme_plot_3, p_data_class=ohlc_class,
+                         p_vlines=None)
 
 # visualize plot
 plot_3.show()
@@ -193,3 +197,36 @@ t_model_1 = table_2['model_1']['max']
 t_model_2 = table_2['model_2']['max']
 t_model_3 = table_2['model_3']['max']
 t_model_3['hidden_layers'] = [str(i) for i in list(t_model_3['hidden_layers'])]
+
+
+# -- ------------------------------------------------------------------------------- Complexity Analysis -- #
+# -- ------------------------------------------------------------------------------- ------------------- -- #
+
+# object for time keeping
+times = {'Quarter': [], 'Semester': [], 'Year': []}
+
+# period size
+size = 'Year'
+
+for size in times.keys():
+    # load data
+    memory_palace = dt.data_save_load(p_data_objects=None, p_data_action='load',
+                                      p_data_file='files/pickle_rick/Genetic_Net_' + size + '.dat')
+
+    # # in quarters obtain 4 folds for each year
+    t_folds = fn.t_folds(p_data=general_data.copy(), p_period=size)
+    # drop the last quarter because it is incomplete until december 31
+    t_folds.pop('q_04_2020', None)
+
+    # list with the names of the models
+    ml_models = list(dt.models.keys())
+
+    model = ml_models[0]
+    period = list(t_folds.keys())[0]
+    tiempos = list()
+
+    for model in ml_models:
+        for period in list(t_folds.keys()):
+            tiempos.append(memory_palace[model][period]['time'].seconds)
+
+    times[size] = np.mean(tiempos)

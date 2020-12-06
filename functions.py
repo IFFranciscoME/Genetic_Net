@@ -113,7 +113,7 @@ def t_folds(p_data, p_period):
     # p_data.iloc[:, 1:] = data_scaler(p_data=p_data.copy(), p_trans='Standard')
 
     # For quarterly separation of the data
-    if p_period == 'quarter':
+    if p_period == 'Quarter':
         # List of quarters in the dataset
         quarters = list(set(time.quarter for time in list(p_data['timestamp'])))
         # List of years in the dataset
@@ -128,7 +128,7 @@ def t_folds(p_data, p_period):
         return q_data
 
     # For quarterly separation of the data
-    elif p_period == 'semester':
+    elif p_period == 'Semester':
         # List of years in the dataset
         years = set(time.year for time in list(p_data['timestamp']))
         s_data = {}
@@ -148,7 +148,7 @@ def t_folds(p_data, p_period):
         return s_data
 
         # For quarterly separation of the data
-    elif p_period == 'year':
+    elif p_period == 'Year':
         # List of years in the dataset
         years = set(time.year for time in list(p_data['timestamp']))
         y_data = {}
@@ -527,7 +527,7 @@ def logistic_net(p_data, p_params):
 # --------------------------------------------------------- MODEL: Least Squares Support Vector Machines -- #
 # --------------------------------------------------------------------------------------------------------- #
 @ignore_warnings(category=ConvergenceWarning)
-def ls_svm(p_data, p_params):
+def l1_svm(p_data, p_params):
     """
     Least Squares Support Vector Machines
 
@@ -548,7 +548,7 @@ def ls_svm(p_data, p_params):
         Diccionario con parametros de entrada para modelos, como los siguientes
 
         p_kernel: str
-                kernel de LS_SVM
+                kernel de l1_svm
                 p_alpha = ['linear']
 
         p_c: float
@@ -757,7 +757,7 @@ def ann_mlp(p_data, p_params):
 # -------------------------------------------------------------------------- FUNCTION: Genetic Algorithm -- #
 # ------------------------------------------------------- ------------------------------------------------- #
 
-def genetic_algo_optimisation(p_data, p_model):
+def genetic_algo_optimization(p_data, p_model):
     """
     El uso de algoritmos geneticos para optimizacion de hiperparametros de varios modelos
 
@@ -774,7 +774,7 @@ def genetic_algo_optimisation(p_data, p_model):
     r_model_ols_elasticnet: dict
         resultados de modelo OLS con regularizacion elastic net
 
-    r_model_ls_svm: dict
+    r_model_l1_svm: dict
         resultados de modelo Least Squares Support Vector Machine
 
     r_model_ann_mlp: dict
@@ -939,7 +939,7 @@ def genetic_algo_optimisation(p_data, p_model):
             chromosome = {'c': eval_individual[0], 'kernel': eval_individual[1], 'gamma': eval_individual[2]}
 
             # model results
-            model = ls_svm(p_data=p_data, p_params=chromosome)
+            model = l1_svm(p_data=p_data, p_params=chromosome)
 
             # True positives in train data
             train_tp = model['results']['matrix']['train'][0, 0]
@@ -1113,7 +1113,7 @@ def model_evaluations(p_features, p_optim_data, p_model):
         elif p_model == 'ls-svm':
             parameters = {'c': params[0], 'kernel': params[1], 'gamma': params[2]}
 
-            return ls_svm(p_data=p_features, p_params=parameters)
+            return l1_svm(p_data=p_features, p_params=parameters)
 
         elif p_model == 'ann-mlp':
             parameters = {'hidden_layers': params[0], 'activation': params[1], 'alpha': params[2],
@@ -1181,7 +1181,7 @@ def folds_evaluations(p_data_folds, p_models, p_saving, p_file_name):
 
             # -- model optimization and evaluation for every element in the Hall of Fame for every period
             # optimization process
-            hof_model = genetic_algo_optimisation(p_data=m_features, p_model=dt.models[model])
+            hof_model = genetic_algo_optimization(p_data=m_features, p_model=dt.models[model])
 
             # Save logs information of the optimisation process
             # memory_palace[model][period]['logs'] = hof_model['logs']
@@ -1367,7 +1367,7 @@ def model_evaluation(p_data, p_memory, p_global_cases, p_models, p_cases):
                                                p_cases=p_cases)
 
                 # get the results of the input features into the model with the optimised parameters
-                global_auc_cases[model][case] = ls_svm(p_data=case_features,
+                global_auc_cases[model][case] = l1_svm(p_data=case_features,
                                                        p_params=p_cases[model][case]['data']['params'])
             elif model == 'ann-mlp':
 

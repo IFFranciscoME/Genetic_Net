@@ -81,7 +81,7 @@ def g_ohlc(p_ohlc, p_theme, p_vlines):
                                         opacity=0.7))
 
     # Layout for margin, and both x and y axes
-    fig_g_ohlc.update_layout(margin=go.layout.Margin(l=50, r=50, b=20, t=50, pad=20),
+    fig_g_ohlc.update_layout(margin=go.layout.Margin(l=50, r=50, b=50, t=50, pad=0),
                              xaxis=dict(title_text=p_labels['x_title']),
                              yaxis=dict(title_text=p_labels['y_title']))
 
@@ -109,18 +109,19 @@ def g_ohlc(p_ohlc, p_theme, p_vlines):
         fig_g_ohlc.update_layout(shapes=shapes_list)
 
     # Update layout for the background
-    fig_g_ohlc.update_layout(yaxis=dict(tickfont=dict(color='grey', size=p_theme['p_fonts']['font_axis']),
-                                        tickvals=y0_ticks_vals),
-                             xaxis=dict(tickfont=dict(color='grey', size=p_theme['p_fonts']['font_axis'])))
+    fig_g_ohlc.update_layout(
+        yaxis=dict(tickfont=dict(color='grey', size=p_theme['p_fonts']['font_axis']),
+                   tickvals=y0_ticks_vals),
+        xaxis=dict(tickfont=dict(color='grey', size=p_theme['p_fonts']['font_axis'])))
 
     # Update layout for the y axis
     fig_g_ohlc.update_xaxes(rangebreaks=[dict(pattern="day of week", bounds=['sat', 'sun'])])
 
     # Update layout for the background
     fig_g_ohlc.update_layout(title_font_size=p_theme['p_fonts']['font_title'],
-                             title=dict(x=0.5, text='Grafica 1:' + '<b> ' + p_labels['title'] + ' </b>'),
-                             yaxis=dict(titlefont=dict(size=p_theme['p_fonts']['font_axis'] + 4)),
-                             xaxis=dict(titlefont=dict(size=p_theme['p_fonts']['font_axis'] + 4)))
+                             title=dict(x=0.5, text=p_labels['title']),
+                             yaxis=dict(titlefont=dict(size=p_theme['p_fonts']['font_axis'])),
+                             xaxis=dict(titlefont=dict(size=p_theme['p_fonts']['font_axis'])))
 
     # Final plot dimensions
     fig_g_ohlc.layout.autosize = True
@@ -200,16 +201,16 @@ def g_relative_bars(p_x, p_y0, p_y1, p_theme):
     # Legend format
     fig_relative_bars.update_layout(paper_bgcolor='white', plot_bgcolor='white', barmode='overlay',
                                     legend=go.layout.Legend(x=.41, y=-.12, orientation='h',
-                                                            font=dict(size=18, color='grey')),
-                                    margin=go.layout.Margin(l=0, r=0, b=0, t=50, pad=40))
+                                                            font=dict(size=p_theme['p_fonts']['font_axis'],
+                                                                      color='grey')),
+                                    margin=go.layout.Margin(l=50, r=50, b=50, t=50, pad=0))
 
     # Update layout for the background
     fig_relative_bars.update_layout(title_font_size=p_theme['p_fonts']['font_title'],
                                     title=dict(x=0.5,
-                                               text='Grafica 3:' + '<b> ' +
-                                                    p_theme['p_labels']['title'] + ' </b>'),
-                                    yaxis=dict(titlefont=dict(size=p_theme['p_fonts']['font_axis'] + 4)),
-                                    xaxis=dict(titlefont=dict(size=p_theme['p_fonts']['font_axis'] + 4)))
+                                               text=p_theme['p_labels']['title']),
+                                    yaxis=dict(titlefont=dict(size=p_theme['p_fonts']['font_axis'])),
+                                    xaxis=dict(titlefont=dict(size=p_theme['p_fonts']['font_axis'])))
 
     # Final plot dimensions
     fig_relative_bars.layout.autosize = True
@@ -227,8 +228,7 @@ def g_roc_auc(p_cases, p_models, p_type, p_theme):
     # p_casos = casos
     fig_rocs = go.Figure()
     fig_rocs.update_layout(
-        title=dict(x=0.5, text='Grafica 4:' + '<b> ' +
-                               p_theme['p_labels']['title'] + ' - ' + p_type + ' data' + ' </b>'),
+        title=dict(x=0.5, text=p_theme['p_labels']['title']),
         xaxis=dict(title_text=p_theme['p_labels']['x_title'],
                    tickfont=dict(color='grey', size=p_theme['p_fonts']['font_axis'])),
         yaxis=dict(title_text=p_theme['p_labels']['y_title'],
@@ -249,10 +249,11 @@ def g_roc_auc(p_cases, p_models, p_type, p_theme):
                                               mode='lines+markers', line=dict(width=2, color='blue')))
 
     # Formato para titulo
-    fig_rocs.update_layout(legend=go.layout.Legend(x=.15, y=-0.11, orientation='h',
-                                                     bordercolor='dark grey',
-                                                     borderwidth=0,
-                                                     font=dict(size=18)))
+    fig_rocs.update_layout(margin=go.layout.Margin(l=50, r=50, b=50, t=50, pad=0),
+        legend=go.layout.Legend(x=.13, y=-0.25, orientation='h',
+                                bordercolor='dark grey',
+                                borderwidth=1,
+                                font=dict(size=p_theme['p_fonts']['font_axis'])))
 
     # Formato de tamanos
     fig_rocs.layout.autosize = True
@@ -288,7 +289,7 @@ def g_timeseries_auc(p_data_auc, p_theme):
 
     fig_ts_auc = go.Figure()
     fig_ts_auc.update_layout(
-        title=dict(x=0.5, text='Grafica 5:' + '<b> ' + p_theme['p_labels']['title'] + ' </b>'),
+        title=dict(x=0.5, text=p_theme['p_labels']['title']),
         xaxis=dict(title_text=p_theme['p_labels']['x_title'],
                    tickfont=dict(color='grey', size=p_theme['p_fonts']['font_axis'])),
         yaxis=dict(title_text=p_theme['p_labels']['y_title'],
@@ -342,17 +343,12 @@ def g_timeseries_auc(p_data_auc, p_theme):
                                     name='ann-mlp (min)',
                                     mode='markers+lines'))
 
-    # # Update layout for the background
-    # fig_ts_auc.update_layout(paper_bgcolor='white', title_font_size=p_theme['p_theme']['font_title'],
-    #                          yaxis=dict(tickvals=np.arange(0, 1.1, 0.1), zeroline=False, automargin=True,
-    #                                     titlefont=dict(size=p_theme['p_theme']['font_axis']+4)),
-    #                          xaxis=dict(titlefont=dict(size=p_theme['p_theme']['font_axis']+4)))
-
     # Formato para titulo
-    fig_ts_auc.update_layout(legend=go.layout.Legend(x=.11, y=-0.21, orientation='h',
-                                                     bordercolor='dark grey',
-                                                     borderwidth=1,
-                                                     font=dict(size=16)))
+    fig_ts_auc.update_layout(margin=go.layout.Margin(l=50, r=50, b=50, t=50, pad=0),
+        legend=go.layout.Legend(x=0.05, y=-0.35, orientation='h',
+                                bordercolor='dark grey',
+                                borderwidth=1,
+                                font=dict(size=p_theme['p_fonts']['font_axis'])))
 
     # Formato de tamanos
     fig_ts_auc.layout.autosize = True
@@ -412,7 +408,7 @@ def g_ohlc_class(p_ohlc, p_theme, p_data_class, p_vlines):
     fig_g_ohlc = go.Figure()
 
     # Layout for margin, and both x and y axes
-    fig_g_ohlc.update_layout(margin=go.layout.Margin(l=50, r=50, b=20, t=50, pad=20),
+    fig_g_ohlc.update_layout(margin=go.layout.Margin(l=50, r=50, b=50, t=50, pad=0),
                              xaxis=dict(title_text=p_labels['x_title']),
                              yaxis=dict(title_text=p_labels['y_title']))
 
@@ -439,9 +435,10 @@ def g_ohlc_class(p_ohlc, p_theme, p_data_class, p_vlines):
         name='Prediction Success'))
 
     # Update layout for the background
-    fig_g_ohlc.update_layout(yaxis=dict(tickfont=dict(color='grey', size=p_theme['p_fonts']['font_axis']),
-                                        tickvals=y0_ticks_vals),
-                             xaxis=dict(tickfont=dict(color='grey', size=p_theme['p_fonts']['font_axis'])))
+    fig_g_ohlc.update_layout(
+        yaxis=dict(tickfont=dict(color='grey', size=p_theme['p_fonts']['font_axis']),
+                   tickvals=y0_ticks_vals),
+        xaxis=dict(tickfont=dict(color='grey', size=p_theme['p_fonts']['font_axis'])))
 
     # Update layout for the y axis
     fig_g_ohlc.update_xaxes(rangebreaks=[dict(pattern="day of week", bounds=['sat', 'sun'])])
@@ -460,20 +457,19 @@ def g_ohlc_class(p_ohlc, p_theme, p_data_class, p_vlines):
         # add v_lines to the layout
         fig_g_ohlc.update_layout(shapes=shapes_list)
 
+    # Update layout for the background
+    fig_g_ohlc.update_layout(title_font_size=p_theme['p_fonts']['font_title'],
+                             title=dict(x=0.5, text=p_theme['p_labels']['title']),
+                             yaxis=dict(title=p_labels['y_title'],
+                                        titlefont=dict(size=p_theme['p_fonts']['font_axis'])),
+                             xaxis=dict(title=p_labels['x_title'], rangeslider=dict(visible=False),
+                                        titlefont=dict(size=p_theme['p_fonts']['font_axis'])))
+
     # Formato para titulo
     fig_g_ohlc.update_layout(legend=go.layout.Legend(x=.35, y=-.3, orientation='h',
                                                      bordercolor='dark grey',
                                                      borderwidth=1,
                                                      font=dict(size=p_theme['p_fonts']['font_axis'])))
-
-    # Update layout for the background
-    fig_g_ohlc.update_layout(title_font_size=p_theme['p_fonts']['font_title'],
-                             title=dict(x=0.5, text='<b> ' + p_labels['title'] + ' </b>'),
-                             yaxis=dict(title=p_labels['y_title'],
-                                        titlefont=dict(size=p_theme['p_fonts']['font_axis'] + 4)),
-                             xaxis=dict(title=p_labels['x_title'], rangeslider=dict(visible=False),
-                                        titlefont=dict(size=p_theme['p_fonts']['font_axis'] + 4)))
-
     # Final plot dimensions
     fig_g_ohlc.layout.autosize = True
     fig_g_ohlc.layout.width = p_theme['p_dims']['width']
